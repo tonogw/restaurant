@@ -44,7 +44,7 @@ export default function AuthCard({
       {/* Toggle capsule */}
       <div className="p-1 bg-gray-100 rounded-xl flex w-full">
         <Link
-          href="/auth/login"
+          href="/login"
           className={`
           w-1/2 text-center py-2 text-sm transition-all rounded-lg
           ${
@@ -57,7 +57,7 @@ export default function AuthCard({
           Sign in
         </Link>
         <Link
-          href="/auth/register"
+          href="/register"
           className={`
           w-1/2 text-center py-2 text-sm transition-all rounded-lg
           ${
