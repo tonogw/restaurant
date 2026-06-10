@@ -8,8 +8,9 @@ export default function Navbar() {
         <Image
           src="/images/logo.svg"
           alt="logo"
-          width={42}
-          height={42}
+          sizes="(max-width: 42px) 1px"
+          // width={42}
+          // height={42}
           className="max-w-10 max-h-10"
         />
       </div>

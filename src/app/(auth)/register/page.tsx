@@ -72,6 +72,7 @@ export default function RegisterPage() {
           alt="Foody Culinary Promotion"
           fill
           priority // Di-load paling awal karena ini elemen LCP Hero Desktop
+          sizes="(max-width:1024 1px, 50vw"
           unoptimized // Agar gambar tajam maksimal sesuai resolusi figma
           className="object-cover"
         />

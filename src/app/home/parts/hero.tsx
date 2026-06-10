@@ -47,10 +47,9 @@ const Hero = () => {
       <Image
         src={backdropImages[currentIdx]}
         alt="Recommended Resto"
-        width={1440}
-        height={827}
         unoptimized
         priority
+        sizes="(max-width:1024 1px, 50vw"
         className="object-cover transition-all duration-1000 ease-in-out scale-105"
       ></Image>
     </div>
