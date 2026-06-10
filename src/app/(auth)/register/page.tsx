@@ -99,6 +99,7 @@ export default function RegisterPage() {
                 type="text"
                 placeholder="Name"
                 {...register("name")}
+                autoComplete="name"
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm focus:outline-hidden focus:border-gray-400 transition-all placeholder:text-gray-400"
               />
               {errors.name && (
@@ -114,6 +115,7 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="Email"
                 {...register("email")}
+                autoComplete="email"
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm focus:outline-hidden focus:border-gray-400 transition-all placeholder:text-gray-400"
               />
               {errors.email && (
@@ -129,6 +131,7 @@ export default function RegisterPage() {
                 type="text"
                 placeholder="Number Phone"
                 {...register("phone")}
+                autoComplete="tel"
                 className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm focus:outline-hidden focus:border-gray-400 transition-all placeholder:text-gray-400"
               />
               {errors.phone && (
@@ -145,6 +148,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   {...register("password")}
+                  autoComplete="new-password"
                   className="w-full px-4 py-3.5 pr-12 rounded-xl border border-gray-200 text-black text-sm focus:outline-hidden focus:border-gray-400 transition-all placeholder:text-gray-400"
                 />
                 <button
@@ -169,6 +173,7 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   {...register("confirmPassword")}
+                  autoComplete="new-password"
                   className="w-full px-4 py-3.5 pr-12 rounded-xl border border-gray-200 text-black text-sm focus:outline-hidden focus:border-gray-400 transition-all placeholder:text-gray-400"
                 />
                 <button
