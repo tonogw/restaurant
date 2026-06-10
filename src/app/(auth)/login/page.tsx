@@ -1,4 +1,10 @@
+"use client";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginInputs } from "@/lib/validations/auth";
+import AuthCard from "@/components/shared/AuthCard";
+import Image from "next/image";
+import Link from "next/link";
 
 type Inputs = {
   example: string;
@@ -11,21 +17,23 @@ export default function App() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
-
-  console.log(watch("example")); // watch input value by passing the name of it
+  } = useForm<LoginInputs>({
+    resolver: zodResolver(loginSchema),
+  });
+  const onSubmit = (data: LoginInputs) => {
+    console.log(data);
+  };
 
   return (
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* register your input into the hook by invoking the "register" function */}
-      <input defaultValue="test" {...register("example")} />
+      {/* <input defaultValue="test" {...register("example")} /> */}
 
       {/* include validation with required or other standard HTML validation rules */}
-      <input {...register("exampleRequired", { required: true })} />
+      {/* <input {...register("exampleRequired", { required: true })} /> */}
       {/* errors will return when field validation fails  */}
-      {errors.exampleRequired && <span>This field is required</span>}
+      {/* {errors.exampleRequired && <span>This field is required</span>} */}
 
       <input type="submit" />
     </form>

@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import { Nunito, Nunito_Sans } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const nunitoSans = Nunito_Sans({
-  variable: "--font-nunito-sans",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
-});
-
-const nunitoMono = Nunito_Sans({
-  variable: "--font-nunito-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,13 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${nunitoSans.variable} ${nunitoMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${nunito.variable} h-full antialiased`}>
       <body
         className="
-      bg-black min-h-full flex flex-col antialiased
+      bg-white min-h-full flex flex-col antialiased
       "
       >
         <Providers>{children}</Providers>

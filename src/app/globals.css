@@ -7,6 +7,8 @@
 @theme {
   /* Font Family */
   --font-nunito: "Nunito", sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui;
+  --font-nunito: var(--font-nunito), ui-sans-serif, system-ui;
 
   /* Font Weights */
   --font-weight-regular: 400;
@@ -78,7 +80,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-nunito);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -212,7 +214,7 @@
   body {
     @apply bg-background text-foreground;
 
-    font-family: var(--font-Nunito);
+    font-family: var(--font-nunito);
   }
   html {
     @apply font-sans;

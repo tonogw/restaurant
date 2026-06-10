@@ -35,14 +35,14 @@ const Hero = () => {
   }, [backdropImages.length]);
   if (isLoading) {
     return (
-      <div className="w-full h-206.75 bg-black rounded-3xl flex items-center justify-center text-gray-400">
+      <div className="w-full h-206.75 bg-white rounded-3xl flex items-center justify-center text-gray-400">
         No background images available
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-206.75 overflow-hidden rounded 3xl bg-black shadow-md">
+    <div className="relative w-full h-206.75 overflow-hidden rounded 3xl bg-white shadow-md">
       {/* Backdrop image */}
       <Image
         src={backdropImages[currentIdx]}

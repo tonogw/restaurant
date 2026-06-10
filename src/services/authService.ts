@@ -1,5 +1,5 @@
 import api from "@/lib/api/axios";
-import type { RegisterUser } from "@/lib/validations/auth";
+import type { LoginInputs, RegisterUser } from "@/lib/validations/auth";
 import type { RegisterResponse } from "@/types/user";
 
 export const authService = {
@@ -8,6 +8,14 @@ export const authService = {
   ): Promise<RegisterResponse> => {
     const response = await api.post<RegisterResponse>(
       "/api/auth/register",
+      payload,
+    );
+    return response.data;
+  },
+
+  login: async (payload: LoginInputs): Promise<RegisterResponse> => {
+    const response = await api.post<RegisterResponse>(
+      "/api/auth/login",
       payload,
     );
     return response.data;
