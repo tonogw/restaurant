@@ -43,6 +43,7 @@ export default function LoginPage() {
     onSuccess: (response) => {
       // Save token into browser
       localStorage.setItem("token", response.data.token);
+      alert("Login successful! Welcome back.");
       router.push("/");
     },
     onError: (error: AxiosError<ApiErrorResponse>) => {
