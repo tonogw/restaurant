@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { RestaurantItem } from "@/types/resto";
+import { Star } from "lucide-react";
 
 interface RestoCardProps {
   resto: RestaurantItem;
@@ -13,14 +14,15 @@ export default function RestoCard({ resto, onClick }: RestoCardProps) {
       className="
       w-full lg:max-w-92.5 h-auto lg:max-h-38 
       border border-gray-100 rounded-2xl 
-        p-4 flex flex-col gap-3
+        p-4 flex flex-row gap-3 items-center select-none
         hover:shadow-md transition-all duration-300 cursor-pointer bg-white group
         "
     >
-      {/* Container */}
+      {/* RESTO LOGO Container */}
+
       <div
         className="relative w-30 h-30 rounded-xl overflow-hidden
-    bg-gray-50 flex shrink-0
+    bg-gray-50 flex shrink-0 shadow-[#CBCACA40] shadow-[203,202,202,0.25]
     "
       >
         <Image
@@ -34,35 +36,45 @@ export default function RestoCard({ resto, onClick }: RestoCardProps) {
         transition-all duration-300
         "
         />
+      </div>
 
-        {/* RIGHT SIDE Resto info */}
-        <div className="flex flex-col justify-center flex-1 min-w-0 gap-1">
-          <h3
-            className="font-bold text-base text-gray-900 truncate group-hover:text-[#B81E1E]
+      {/* RIGHT SIDE Resto info */}
+      <div className="flex flex-col justify-center flex-1 min-w-0 h-full gap-1">
+        <h3
+          className="font-extrabold text-lg text-gray-900 truncate group-hover:text-[#B81E1E]
           transition-colors
           "
-          >
-            {resto.name}
-          </h3>
-
-          <div
-            className="flex flex-col items-center gap-1 text-xs text-gray-500
+        >
+          {resto.name}
+        </h3>
+        <div
+          className="flex items-center gap-1 text-xs text-gray-500
           font-medium 
           "
+        >
+          <Star
+            width={17.12}
+            height={16.35}
+            stroke="[#FFAB0D]"
+            className="fill-[#FFAB0D] "
+          />
+
+          <span className="text-[#0A0D12] font-medium ">
+            {resto.star.toFixed(1)}
+          </span>
+        </div>
+        <div className="flex">
+          <p className="truncate text-[#0A0D12] font-regular text-base">
+            {resto.place}
+          </p>
+          <span className="text-[#0A0D12] font-regular">•</span>
+
+          <span
+            className=" text-[#0A0D12] font-regular
+          px-2 py-0.5 rounded-md w-max mt-1 text-base items-center justify-center"
           >
-            <span className="text-amber-500 font-bold fill-[#FFAB0D]">
-              ⭐ {resto.star.toFixed(1)}
-            </span>
-            <span className="text-gray-300">•</span>
-            <p className="truncate text-gray-400">{resto.place}</p>
-            <span className="text-gray-300">•</span>
-            <span
-              className="bg-gray-100 text-gray-600 font-semibold
-             px-2 py-0.5 rounded-md w-max mt-1 text-xs"
-            >
-              {resto.distance}
-            </span>
-          </div>
+            {resto.distance} km
+          </span>
         </div>
       </div>
     </div>
