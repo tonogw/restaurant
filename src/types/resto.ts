@@ -201,3 +201,5 @@ export interface RecommendationResponse {
     recommendations: RecommendationItem[];
   };
 }
+
+export interface MyOrder {}
