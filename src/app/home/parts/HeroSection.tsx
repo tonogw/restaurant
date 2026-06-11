@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { FormEvent } from "react";
 import LBurger from "../../../../public/images/Image-landscape-beefburger.png";
 
 interface HeroSectionProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onSearchSubmit: (e: React.FormEvent) => void;
+  onSearchSubmit: (e: FormEvent) => void;
 }
 
 export default function HeroSection({
@@ -21,26 +21,30 @@ export default function HeroSection({
       <Image
         src={LBurger} // Pastikan file gambar figma ditaruh di public/images/main-hero.png
         alt="Explore Culinary Experiences"
-        width={1440}
-        height={827}
+        fill
+        // width={1440}
+        // height={827}
         priority
-        sizes="100vw"
+        // sizes="100vw"
         className="object-cover opacity-40" // Opacity dikurangi agar tulisan putih di atasnya kontras & terbaca tajam
       />
 
       {/* Konten Teks & Search (Melayang di atas background) */}
-      <div className="relative z-10 text-center space-y-6 max-w-3xl w-full -mt-20">
-        <h1 className="text-white text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-md -mt-20">
-          Explore Culinary Experiences
-        </h1>
-        <p className="text-gray-200 text-xs md:text-sm font-medium tracking-wide">
-          Search and refine your choice to discover the perfect restaurant.
-        </p>
+      <div className="relative z-10 text-center space-y-6 max-w-300 mx-auto pt-80">
+        <div className="space-y-3 max-w-178 text-center">
+          <h1 className="text-white text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-md -mt-20">
+            Explore Culinary Experiences
+          </h1>
+          <p className="text-gray-200 text-xs md:text-sm font-medium tracking-wide">
+            Search and refine your choice to discover the perfect restaurant.
+          </p>
+        </div>
 
         {/* Input Pencarian di Tengah */}
         <form
+          id="search-hero"
           onSubmit={onSearchSubmit}
-          className="w-full max-w-xl mx-auto relative px-2"
+          className="w-full max-w-151 mx-auto relative px-2"
         >
           <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
             🔍

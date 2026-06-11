@@ -1,26 +1,25 @@
 "use client";
 // import RegisterPage from "./(auth)/register/page";
+import React, { useState, useEffect, FormEvent } from "react";
+import Image from "next/image";
 import Footer from "./home/parts/footer";
-// import Hero from "./home/parts/hero";
 import Navbar from "./home/parts/navbar";
 import HeroSection from "@/app/home/parts/HeroSection";
-
-// import Image from "next/image";
-
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { restoApi } from "@/lib/api/resto";
-import React, { useState, useEffect } from "react";
 import RestoCard from "@/components/shared/RestoCard";
-// import { userInfo } from "os";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
+import { categoryData } from "@/constant/category-data";
+// import Hero from "./home/parts/hero";
+// import { userInfo } from "os";
 
-const CATEGORIES = [
-  { name: "All Restaurant", icon: "🍔" },
-  { name: "Nearby", icon: "📍" },
-  { name: "Best Seller", icon: "🏆" },
-  { name: "Lunch", icon: "Rice" },
-];
+// const CATEGORIES = [
+//   { name: "All Restaurant", icon: "🍔" },
+//   { name: "Nearby", icon: "📍" },
+//   { name: "Best Seller", icon: "🏆" },
+//   { name: "Lunch", icon: "Rice" },
+// ];
 
 export default function HomePage() {
   const router = useRouter();
@@ -84,30 +83,59 @@ export default function HomePage() {
       {/* SELECTION CATEGORY */}
       <section
         id="category"
-        className="max-w-300 w-full mx-auto px-6 py-10 
-        grid grid-cols-2 md:grid-cols-4 gap-4
+        className="max-w-300 w-full mx-auto px-6 py-10
+     z-20 -mt-32 
+        
         "
       >
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.name}
-            onClick={() => updateParams("category", cat.name)}
-            className={`
-            p-4 rounded-xl border flex flex-col items-center
-            justify-center gap-2 transition-all cursor-pointer
-            ${
-              currentCategory === cat.name
-                ? "border-amber-500 bg-amber-50/30 font-bold"
-                : "border-gray-100 bg-white"
-            }
-            `}
-          >
-            <span className="text-2xl">{cat.icon}</span>
-            <span className="text-xs font-semibold text-gray-700">
-              {cat.name}
-            </span>
-          </button>
-        ))}
+        <div
+          className="bg-white p-6 rounded-3xl shadow-xl 
+        grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4
+        
+        "
+        >
+          {categoryData.map((cat) => {
+            const isActive = currentCategory === cat.category;
+            return (
+              <button
+                key={cat.category}
+                onClick={() => updateParams("category", cat.category)}
+                className={`
+                p-4 rounded-xl border flex flex-col items-center
+                justify-center gap-2 transition-all cursor-pointer
+                 shadow-gray-400
+                ${
+                  isActive
+                    ? cat.hoverBg + "scale-102 border-amber-500 bg-amber-50/30"
+                    : "border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50/50"
+                }
+                `}
+              >
+                {/* FETCH CATEGORY ICON */}
+                <span>
+                  <Image
+                    src={cat.src}
+                    alt={cat.alt}
+                    width={65}
+                    height={65}
+                    className="object-contain"
+                  />
+                </span>
+                <span
+                  className={`
+                    text-xs font-bold tracking-tight text-center ${
+                      isActive
+                        ? "text-amber-600 hover:zoom-in-50"
+                        : "text-gray-600"
+                    }
+                    `}
+                >
+                  {cat.category}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </section>
 
       {/* MAIN RESTO LIST */}
@@ -121,6 +149,7 @@ export default function HomePage() {
           </span>
         </div>
 
+        {/* LOADING  */}
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, id) => (
@@ -131,7 +160,9 @@ export default function HomePage() {
             ))}
           </div>
         )}
-        <div>
+
+        {/* RESTO CARD GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {restoList.map((resto: RestaurantItem) => (
             <RestoCard
               key={resto.id}

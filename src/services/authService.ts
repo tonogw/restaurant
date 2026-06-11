@@ -25,11 +25,8 @@ export const authService = {
     return response.data;
   },
 
-  profile: async (payload: EndUserProfile): Promise<EndUserProfileResponse> => {
-    const response = await api.get<EndUserProfileResponse>(
-      "api/auth/profile",
-      payload,
-    );
+  profile: async (): Promise<EndUserProfileResponse> => {
+    const response = await api.get<EndUserProfileResponse>("api/auth/profile");
     return response.data;
   },
 };

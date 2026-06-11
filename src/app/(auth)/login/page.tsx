@@ -85,7 +85,11 @@ export default function LoginPage() {
               {errorMessage}
             </div>
           )}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form
+            id="login-page"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+          >
             {/* Input email */}
             <div className="flex flex-col gap-1">
               <input

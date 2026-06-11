@@ -9,11 +9,16 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AuthCard from "@/components/shared/AuthCard";
+import { useQuery } from "@tanstack/react-query";
+import { authService } from "@/services/authService";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
+    setHasToken(!!localStorage.getItem("token"));
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 0);
     };
@@ -22,6 +27,20 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // @tanstack query auto callback profile data
+  const { data: profileData, isSuccess } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: authService.profile,
+    enabled: hasToken,
+  });
+
+  const endUser = profileData?.data;
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
 
   return (
     // MAIN CONTAINER w-full device screen
@@ -104,6 +123,7 @@ export default function Navbar() {
                   activeTab="login"
                 >
                   <form
+                    id="login-navbar"
                     className="
                   space-y-4 mt-2
                   "
@@ -174,6 +194,7 @@ export default function Navbar() {
                   activeTab="register"
                 >
                   <form
+                    id="register-navbar"
                     className="
                   space-y-4 mt-2
                   "

@@ -92,7 +92,11 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            id="register-page"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
             {/* INPUT NAME */}
             <div className="flex flex-col gap-1">
               <input
