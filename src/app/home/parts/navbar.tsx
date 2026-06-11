@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
   SheetDescription,
-  SheetClose,
 } from "@/components/ui/sheet";
 import AuthCard from "@/components/shared/AuthCard";
 
@@ -82,10 +80,9 @@ export default function Navbar() {
                 variant="ghost"
                 className={`
                 font-bold text-sm rounded-xl cursor-pointer transition-colors
-                hover:bg-gray-300
                 ${
                   scrolled
-                    ? "text-gray-700 hover:text-black hover:bg-gray-100"
+                    ? "bg-[#B81E1E] hover:bg-[#961818] text-gray-700 hover:text-white"
                     : "text-white hover:text-gray-200 hover:bg-white/10"
                 }
                 `}
@@ -130,7 +127,7 @@ export default function Navbar() {
                     <button
                       type="submit"
                       className="
-                    w-full bg-[##C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
+                    w-full bg-[#C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
                     hover:bg-[#fdfdfd]
                     "
                     >
@@ -228,7 +225,7 @@ export default function Navbar() {
                     <button
                       type="submit"
                       className="
-                    w-full bg-[##C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
+                    w-full bg-[#C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
                     "
                     >
                       Register

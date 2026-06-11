@@ -16,20 +16,21 @@ export default function HeroSection({
   onSearchSubmit,
 }: HeroSectionProps) {
   return (
-    <header className="relative w-full h-[480px] bg-zinc-900 flex flex-col items-center justify-center px-4">
+    <header className="relative w-full h-[827px] bg-zinc-900 flex flex-col items-center justify-center">
       {/* Background Burger Besar */}
       <Image
         src={LBurger} // Pastikan file gambar figma ditaruh di public/images/main-hero.png
         alt="Explore Culinary Experiences"
-        fill
+        width={1440}
+        height={827}
         priority
         sizes="100vw"
         className="object-cover opacity-40" // Opacity dikurangi agar tulisan putih di atasnya kontras & terbaca tajam
       />
 
       {/* Konten Teks & Search (Melayang di atas background) */}
-      <div className="relative z-10 text-center space-y-6 max-w-3xl w-full">
-        <h1 className="text-white text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-md">
+      <div className="relative z-10 text-center space-y-6 max-w-3xl w-full -mt-20">
+        <h1 className="text-white text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-md -mt-20">
           Explore Culinary Experiences
         </h1>
         <p className="text-gray-200 text-xs md:text-sm font-medium tracking-wide">
