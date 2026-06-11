@@ -79,7 +79,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Kolom Kanan: Tempat Meletakkan Form Register Card */}
-      <div className="flex items-center justify-center p-6 md:p-12 overflow-y-auto bg-white">
+      <div className="flex items-center bg-white justify-center p-6 md:p-12 overflow-y-auto bg-white">
         <AuthCard
           title="Welcome Back"
           subtitle="Good to see you again! Let's eat"

@@ -1,3 +1,6 @@
+"use client";
+
+import { AxiosError } from "axios";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,114 +12,139 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AuthCard from "@/components/shared/AuthCard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/authService";
 import Link from "next/link";
-import whiteBag from "../../../../public/icons/icon-bag-white.svg";
-import blackBag from "../../../../public/icons/icon-bag-black.svg";
+// import whiteBag from "@/public/icons/icon-bag-white.svg";
+// import blackBag from "@/public/icons/icon-bag-black.svg";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useForm } from "react-hook-form";
+import { LoginInputs, loginSchema } from "@/lib/validations/auth";
+import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+// import { Button } from "@/components/ui/button";
+import { Eye, EyeClosed } from "lucide-react";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [hasToken, setHasToken] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const token = useAuthStore((state) => state.token);
+  const setToken = useAuthStore((state) => state.setToken);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    setHasToken(!!localStorage.getItem("token"));
-
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 0);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // =========================================================
+  // 1. FORM & MUTATION LOGIN
+  // =========================================================
+  const loginForm = useForm<LoginInputs>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  // MUTATION PIPELINE API @tanstack query
+  const loginMutation = useMutation({
+    mutationFn: authService.login,
+    onSuccess: (response) => {
+      setToken(response.data.token);
+      localStorage.setItem("token", response.data.token);
+      setErrorMessage(null);
+      loginForm.reset();
+      alert("Login successful!");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      setErrorMessage(error.response?.data?.message || "Invalid credentials.");
+    },
+  });
+
+  // =========================================================
+  // 2. FORM & MUTATION REGISTER
+  // =========================================================
+  const registerForm = useForm<RegisterUser>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: authService.register,
+    onSuccess: (response) => {
+      setToken(response.data.token);
+      localStorage.setItem("token", response.data.token);
+      setErrorMessage(null);
+      registerForm.reset();
+      alert("Registration successful!");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      setErrorMessage(error.response?.data?.message || "Registration failed.");
+    },
+  });
 
   // @tanstack query auto callback profile data
   const { data: profileData, isSuccess } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: authService.profile,
-    enabled: hasToken,
+    queryKey: ["user-profile", token],
+    queryFn: () => authService.profile(),
+    enabled: !!token,
   });
 
   const endUser = profileData?.data;
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
+  const isLoggedIn = !!token && isSuccess && endUser;
 
   return (
-    // MAIN CONTAINER w-full device screen
     <header
-      className={`
-      fixed top-0 left-0 z-50 w-full transition-all duration-300
-      ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-xs border-b bprder-gray-100"
-          : "bg-transparent"
-      }
-      `}
+      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
-      {/* NAVBAR CONTAINER w-max 1200px */}
-      <div
-        className="
-        custom-container h-16 md:h-20 flex items-center justify-between
-        "
-      >
-        {/* Image Logo */}
-        <Link href="/" className="flex items-center select-none gap-3">
-          <div className="relative w-10 h-10">
-            <Image
-              src="/images/logo.svg"
-              alt="logo"
-              width={42}
-              height={42}
-              unoptimized
-              className="object-contain"
-            />
-          </div>
-          {/* WHEN SCROLLED change color */}
+      <div className="custom-container h-16 md:h-20 flex items-center justify-between">
+        {/* SISI KIRI: LOGO */}
+        <Link href="/" className="flex items-center gap-3 select-none">
+          <Image
+            src="/images/logo.svg"
+            alt="logo"
+            width={42}
+            height={42}
+            unoptimized
+          />
           <span
-            className={`
-            font-bold text-3xl tracking-tight transition-colors
-            ${scrolled ? "text-gray-900" : "text-white"}
-            `}
+            className={`text-2xl font-bold tracking-tight ${scrolled ? "text-gray-900" : "text-white"}`}
           >
             Foody
           </span>
         </Link>
 
-        {/* DYNAMIC RIGHT BLOK: AuthButton shadcn sheet slide-left */}
-        {/* AFTER LOGIN */}
+        {/* RIGHT BLOK */}
         <div className="flex items-center gap-4">
-          {hasToken && isSuccess && endUser ? (
+          {isLoggedIn ? (
+            // ================= SCREEN: AFTER LOGIN =================
             <div className="flex items-center gap-4 select-none">
-              {/* ICON BAG */}
               <Link
                 href="/cart"
                 className="relative p-2 hover:opacity-80 transition-opacity"
               >
                 <Image
-                  src={whiteBag}
+                  src="/icons/icon-bag-white.svg"
                   alt="White bag"
-                  className={`
-                ${scrolled ? "hidden" : "bg-transparent"}
-                `}
+                  width={32}
+                  height={32}
+                  className={scrolled ? "hidden" : "block"}
                 />
                 <Image
-                  src={blackBag}
+                  src="/icons/icon-bag-black.svg"
                   alt="Black bag"
-                  className={`
-                ${scrolled ? "bg-transparent" : "hidden"}
-                `}
+                  width={32}
+                  height={32}
+                  className={scrolled ? "block" : "hidden"}
                 />
               </Link>
-
-              {/* DIVIDER */}
               <div
                 className="flex items-center gap-2 group cursor-pointer"
-                onClick={handleLogout}
-                title="Click to Sign Out"
+                onClick={() => {
+                  logout();
+                  window.location.reload();
+                }}
               >
                 <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500">
                   <Image
@@ -128,186 +156,188 @@ export default function Navbar() {
                   />
                 </div>
                 <span
-                  className={`
-                      text-sm font-bold tracking-tight transition-colors ${
-                        scrolled
-                          ? "text-gray-800"
-                          : "text-white hover:text-gray-200"
-                      }
-                      `}
+                  className={`text-sm font-bold tracking-tight ${scrolled ? "text-gray-800" : "text-white"}`}
                 >
                   {endUser.name}
                 </span>
               </div>
             </div>
           ) : (
-            // BEFORE LOGIN
+            // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
-              {/* LOGIN BUTTON */}
+              {/* ===  SHEET LOGIN === */}
               <Sheet>
-                {/* BUTTON TRIGGER for sign in */}
-                <SheetTitle title="Sheet Login" />
-                <SheetDescription aria-description="Sheet Login" />
+                <SheetTitle className="hidden">Login Panel</SheetTitle>
+                <SheetDescription className="hidden">
+                  Enter credentials
+                </SheetDescription>
                 <SheetTrigger asChild>
+                  {/* Button variant="ghost" murni kosmetik transparan sesuai bawaan Shadcn */}
                   <Button
                     variant="ghost"
-                    className={`
-                  font-bold text-sm rounded-xl cursor-pointer transition-colors
-                  ${
-                    scrolled
-                      ? "bg-[#B81E1E] hover:bg-[#961818] text-gray-700 hover:text-white"
-                      : "text-white hover:text-gray-200 hover:bg-white/10"
-                  }
-                    `}
+                    className={`font-bold text-sm rounded-xl border border-gray-400 px-14 py-2.25 cursor-pointer ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"}`}
                   >
                     Sign In
                   </Button>
                 </SheetTrigger>
-
-                {/* SLIDE IN PANEL from right to left */}
                 <SheetContent
                   side="right"
-                  className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
+                  className="w-full sm:max-w-md lg:max-w-180  p-8 flex items-center justify-center border-l border-gray-100"
                 >
-                  <div className="w-full flex justify-center">
-                    {/* CALLBACK AuthCard */}
-                    <AuthCard
-                      title="Welcome Back"
-                      subtitle="Good to see you again! Let's eat"
-                      activeTab="login"
+                  <AuthCard
+                    title="Welcome Back"
+                    subtitle="Good to see you again! Let's eat"
+                    activeTab="login"
+                  >
+                    {errorMessage && (
+                      <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold">
+                        ⚠ {errorMessage}
+                      </div>
+                    )}
+                    <form
+                      onSubmit={loginForm.handleSubmit((data) =>
+                        loginMutation.mutate(data),
+                      )}
+                      className="space-y-4 mt-2"
                     >
-                      <form
-                        id="login-navbar"
-                        className="
-                    space-y-4 mt-2
-                    "
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        autoComplete="email"
+                        {...loginForm.register("email")}
+                        className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        autoComplete="current-password"
+                        {...loginForm.register("password")}
+                        className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      {/* TOGGLE SHOW PASSWORD */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
                       >
-                        <input
-                          type="text"
-                          placeholder="Email"
-                          autoComplete="email"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm
-                      "
-                        />
-                        <input
-                          type="text"
-                          placeholder="Password"
-                          autoComplete="current-password"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm 
-                      "
-                        />
-                        <button
-                          type="submit"
-                          className="
-                      w-full bg-[#C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
-                      hover:bg-[#fdfdfd]
-                      "
-                        >
-                          Login
-                        </button>
-                      </form>
-                    </AuthCard>
-                  </div>
+                        {showPassword ? (
+                          <EyeClosed size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
+                      >
+                        Login
+                      </button>
+                    </form>
+                  </AuthCard>
                 </SheetContent>
               </Sheet>
 
-              {/* REGISTER */}
+              {/* === SHEET REGISTER === */}
               <Sheet>
-                {/* BUTTON TRIGGER for sign in */}
-                <SheetTitle title="Sheet Login" />
-                <SheetDescription aria-description="Sheet Login" />
+                <SheetTitle className="hidden">Register Panel</SheetTitle>
+                <SheetDescription className="hidden">
+                  Create an account
+                </SheetDescription>
                 <SheetTrigger asChild>
+                  {/* Button variant="outline" otomatis memberikan border figma tipis tanpa ketik manual */}
                   <Button
-                    variant="ghost"
-                    className={`
-                  font-bold text-sm rounded-xl cursor-pointer transition-colors
-                  hover:bg-[#fdfdfd]
-                  ${
-                    scrolled
-                      ? "text-gray-700 hover:text-black hover:bg-gray-100"
-                      : "text-white hover:text-gray-200 hover:bg-white/10"
-                  }
-                    `}
+                    variant="outline"
+                    className={`font-bold text-sm rounded-xl cursor-pointer ${scrolled ? "text-gray-700 border-gray-200 hover:bg-gray-50" : "text-white border-white/20 hover:bg-white/10"}`}
                   >
                     Register
                   </Button>
                 </SheetTrigger>
-
-                {/* SLIDE IN PANEL from right to left */}
                 <SheetContent
                   side="right"
                   className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
                 >
-                  <div className="w-full flex justify-center">
-                    {/* CALLBACK AuthCard */}
-                    <AuthCard
-                      title="Welcome to Foody"
-                      subtitle="Glad you're here! Let's get started"
-                      activeTab="register"
+                  <AuthCard
+                    title="Welcome to Foody"
+                    subtitle="Glad you're here! Let's get started"
+                    activeTab="register"
+                  >
+                    <form
+                      onSubmit={registerForm.handleSubmit((data) => {
+                        const { confirmPassword: _, ...payload } = data;
+                        registerMutation.mutate(payload);
+                      })}
+                      className="space-y-3 mt-2"
                     >
-                      <form
-                        id="register-navbar"
-                        className="
-                    space-y-4 mt-2
-                    "
+                      <input
+                        type="text"
+                        placeholder="Name"
+                        autoComplete="name"
+                        {...registerForm.register("name")}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        autoComplete="email"
+                        {...registerForm.register("email")}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Phone Number"
+                        autoComplete="tel"
+                        {...registerForm.register("phone")}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        autoComplete="new-password"
+                        {...registerForm.register("password")}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      {/* TOGGLE SHOW PASSWORD */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
                       >
-                        <input
-                          type="text"
-                          placeholder="Name"
-                          autoComplete="name"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm 
-                      "
-                        />
+                        {showPassword ? (
+                          <EyeClosed size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
 
-                        <input
-                          type="text"
-                          placeholder="Email"
-                          autoComplete="email"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm
-                      "
-                        />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Confirm Password"
+                        autoComplete="new-password"
+                        {...registerForm.register("confirmPassword")}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                      />
+                      {/* TOGGLE SHOW PASSWORD */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                      >
+                        {showPassword ? (
+                          <EyeClosed size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
 
-                        <input
-                          type="text"
-                          placeholder="Phone Number"
-                          autoComplete="tel"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm 
-                      "
-                        />
-
-                        <input
-                          type="text"
-                          placeholder="Password"
-                          autoComplete="new-password"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm 
-                      "
-                        />
-
-                        <input
-                          type="text"
-                          placeholder="Confirm Password"
-                          autoComplete="confirm-new-password"
-                          className="
-                      w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm 
-                      "
-                        />
-                        <button
-                          type="submit"
-                          className="
-                      w-full bg-[#C12116] text-neutral-25 font-bold py-2.25 rounded-full px-[152.5px] lg:px-41.75 
-                      "
-                        >
-                          Register
-                        </button>
-                      </form>
-                    </AuthCard>
-                  </div>
+                      <button
+                        type="submit"
+                        className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
+                      >
+                        Register
+                      </button>
+                    </form>
+                  </AuthCard>
                 </SheetContent>
               </Sheet>
             </div>
