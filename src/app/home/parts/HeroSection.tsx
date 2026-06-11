@@ -16,7 +16,7 @@ export default function HeroSection({
   onSearchSubmit,
 }: HeroSectionProps) {
   return (
-    <header className="relative w-full h-[827px] bg-zinc-900 flex flex-col items-center justify-center">
+    <header className="relative w-full h-206.75 bg-zinc-900 flex items-center justify-center">
       {/* Background Burger Besar */}
       <Image
         src={LBurger} // Pastikan file gambar figma ditaruh di public/images/main-hero.png

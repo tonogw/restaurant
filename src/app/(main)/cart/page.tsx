@@ -28,7 +28,7 @@ export default function CartPage() {
           </Link>
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

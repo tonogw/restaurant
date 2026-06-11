@@ -6,8 +6,8 @@ import Link from "next/link";
 const Footer = () => {
   return (
     // Footer main container
-    <footer className="relative bg-gray-400 bottom-0 dark:bg-black z-50 w-full">
-      <div className="mx-auto   flex-between h-122.5 pt-20 justify-between items-start border border-red-400">
+    <footer className="relative custom-container bg-gray-400 bottom-0 dark:bg-black z-50 w-full">
+      <div className="mx-auto   flex-between h-122.5 pt-20 justify-between items-start ">
         {/* Left-blok: logo, description, sosmed */}
         <div className="flex flex-col w-95 ">
           {/* Image logo */}
@@ -19,7 +19,7 @@ const Footer = () => {
               height={42}
               className="max-w-10.5 max-h-10.5"
             />
-            <h2 className="text-black text-[32px] tracking-tight font-bold border border-red-500">
+            <h2 className="text-black text-[32px] tracking-tight font-bold ">
               Foody
             </h2>
           </div>
@@ -39,7 +39,7 @@ const Footer = () => {
           </span>
 
           {/* Icon sosmed gap-20 from title */}
-          <div className="flex  items-center gap-4 pt-5 border border-blue-500">
+          <div className="flex  items-center gap-4 pt-5 ">
             {followSosmedImage.map((icon) => (
               <Link
                 href={icon.href}
@@ -67,7 +67,7 @@ const Footer = () => {
         </div>
 
         {/* Center Blok - explore list */}
-        <div className="w-50 border border-amber-500">
+        <div className="w-50 ">
           <ul className="flex flex-col gap-3">
             {footerExplore.map((data, index) => (
               <li key={data.label}>
@@ -86,7 +86,7 @@ const Footer = () => {
         </div>
 
         {/* Right Blok - help list */}
-        <div className="w-50 border border-green-600">
+        <div className="w-50 ">
           <ul className="flex flex-col gap-3">
             {footerHelp.map((data, index) => (
               <li key={data.label}>
