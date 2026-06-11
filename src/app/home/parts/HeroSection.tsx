@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React from "react";
+import LBurger from "../../../../public/images/Image-landscape-beefburger.png";
 
 interface HeroSectionProps {
   searchValue: string;
@@ -18,7 +19,7 @@ export default function HeroSection({
     <header className="relative w-full h-[480px] bg-zinc-900 flex flex-col items-center justify-center px-4">
       {/* Background Burger Besar */}
       <Image
-        src="/images/main-hero.png" // Pastikan file gambar figma ditaruh di public/images/main-hero.png
+        src={LBurger} // Pastikan file gambar figma ditaruh di public/images/main-hero.png
         alt="Explore Culinary Experiences"
         fill
         priority

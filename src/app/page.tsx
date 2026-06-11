@@ -65,14 +65,14 @@ export default function HomePage() {
     >
       {/* NAVBAR */}
       <Navbar />
-      <nav
+      {/* <nav
         className="w-full bg-black text-white px-6 md:px-16 py-4 
       flex justify-between items-center
       "
       >
         <span className="text-xl font-bold ">Foody</span>
         <span className="text-sm font-semibold">userInfo</span>
-      </nav>
+      </nav> */}
 
       {/* HERO COMPONENT */}
       <HeroSection
