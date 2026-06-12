@@ -210,6 +210,7 @@ export default function Navbar({
                       className="space-y-4 mt-2"
                     >
                       <input
+                        id="email"
                         type="email"
                         placeholder="Email"
                         autoComplete="email"
@@ -218,6 +219,7 @@ export default function Navbar({
                       />
                       <div className="relative w-full">
                         <input
+                          id="current-password"
                           type={showPassword ? "text" : "password"}
                           placeholder="Password"
                           autoComplete="current-password"
@@ -281,6 +283,7 @@ export default function Navbar({
                       className="space-y-3 mt-2"
                     >
                       <input
+                        id="name"
                         type="text"
                         placeholder="Name"
                         autoComplete="name"
@@ -288,6 +291,7 @@ export default function Navbar({
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                       />
                       <input
+                        id="email"
                         type="email"
                         placeholder="Email"
                         autoComplete="email"
@@ -295,6 +299,7 @@ export default function Navbar({
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                       />
                       <input
+                        id="phone"
                         type="text"
                         placeholder="Phone Number"
                         autoComplete="tel"
@@ -302,6 +307,7 @@ export default function Navbar({
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                       />
                       <input
+                        id="new-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         autoComplete="new-password"
@@ -322,6 +328,7 @@ export default function Navbar({
                       </button>
 
                       <input
+                        id="new-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Confirm Password"
                         autoComplete="new-password"

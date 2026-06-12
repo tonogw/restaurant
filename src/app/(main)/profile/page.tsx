@@ -21,9 +21,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Span } from "next/dist/trace";
 import { Camera } from "lucide-react";
-import { file } from "zod";
+import { useAuthStore } from "@/store/useAuthStore";
+// import { Span } from "next/dist/trace";
+// import { file } from "zod";
 // import delAddress from "icons/"
 
 export default function ProfilePage() {
@@ -57,6 +58,8 @@ export default function ProfilePage() {
   } = useForm<UpdateUserInput>({
     resolver: zodResolver(UpdateProfileSchema),
   });
+
+  const logout = useAuthStore((state) => state.logout);
 
   // SYNC DATA DEFAULT PRIOR UPDATE
   useEffect(() => {
@@ -179,7 +182,13 @@ export default function ProfilePage() {
               />
               My Orders
             </button>
-            <button className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-red-600 rounded-xl w-full text-left mt-4 border-t border-gray-50 pt-4">
+            <button
+              onClick={() => {
+                logout();
+                window.location.href = "/";
+              }}
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-red-600 rounded-xl w-full text-left mt-4 border-t border-gray-50 pt-4"
+            >
               <Image
                 src="/icons/icon-logout.svg"
                 alt="icon logout"
@@ -251,9 +260,9 @@ export default function ProfilePage() {
             {/* DRAW SHEET FROM BUTTON  */}
             <SheetContent
               side="bottom"
-              className="h-[75vh] bg-white rounded-t-[32px] p-8 border-t border-gray-100 shadow-2xl flex flex-col items-center"
+              className="h-[75vh] bg-white rounded-t-[32px] p-8 border-t border-gray-100 shadow-2xl flex flex-col items-center max-w-90.25 sm:max-w-131 mx-auto left-0 right-0"
             >
-              <div className="w-131 max-w-xl">
+              <div className="w-131 px-4 max-w-xl">
                 <SheetHeader className="text-left mb-6">
                   <SheetTitle className="text-2xl font-extrabold text-gray-900 ">
                     Edit Profile Information
@@ -291,6 +300,7 @@ export default function ProfilePage() {
                   </button>
                   {/* FILE EXPLORER */}
                   <input
+                    id="image-file"
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
@@ -315,6 +325,7 @@ export default function ProfilePage() {
                       Full Name
                     </label>
                     <input
+                      id="name"
                       type="text"
                       {...register("name")}
                       className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"
@@ -331,6 +342,7 @@ export default function ProfilePage() {
                       Email Address
                     </label>
                     <input
+                      id="email"
                       type="email"
                       {...register("email")}
                       className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"
@@ -347,6 +359,7 @@ export default function ProfilePage() {
                       Handphone Number
                     </label>
                     <input
+                      id="phone"
                       type="text"
                       {...register("phone")}
                       className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"

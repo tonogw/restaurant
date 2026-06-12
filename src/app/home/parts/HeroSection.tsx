@@ -50,6 +50,7 @@ export default function HeroSection({
             🔍
           </span>
           <input
+            id="search-resto"
             type="text"
             placeholder="Search restaurants, food and drink"
             value={searchValue}

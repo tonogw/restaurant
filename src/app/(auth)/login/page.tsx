@@ -93,6 +93,7 @@ export default function LoginPage() {
             {/* Input email */}
             <div className="flex flex-col gap-1">
               <input
+                id="email"
                 type="email"
                 placeholder="Email"
                 {...register("email")}
@@ -113,6 +114,7 @@ export default function LoginPage() {
             {/* Input Password */}
             <div className="relative w-full">
               <input
+                id="current-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 {...register("password")}

@@ -100,6 +100,7 @@ export default function RegisterPage() {
             {/* INPUT NAME */}
             <div className="flex flex-col gap-1">
               <input
+                id="name"
                 type="text"
                 placeholder="Name"
                 {...register("name")}
@@ -116,6 +117,7 @@ export default function RegisterPage() {
             {/* INPUT EMAIL */}
             <div className="flex flex-col gap-1">
               <input
+                id="email"
                 type="email"
                 placeholder="Email"
                 {...register("email")}
@@ -132,6 +134,7 @@ export default function RegisterPage() {
             {/* INPUT PHONE */}
             <div className="flex flex-col gap-1">
               <input
+                id="phone"
                 type="text"
                 placeholder="Number Phone"
                 {...register("phone")}
@@ -149,6 +152,7 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-1">
               <div className="relative w-full">
                 <input
+                  id="new-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   {...register("password")}
@@ -174,6 +178,7 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-1">
               <div className="relative w-full">
                 <input
+                  id="new-password"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   {...register("confirmPassword")}
