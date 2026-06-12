@@ -92,7 +92,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-28 pb-20 px-6 md:px-16">
-      <Navbar />
+      <Navbar isLightPage={true} />
       <div className="max-w-300 mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
         {/* LEFT SIDE:  NAVIGATION SIDEBAR */}
         <aside className="bg-white p-6 rounded-2xl border border-gray-100 shadow-xs flex flex-col gap-6">

@@ -27,7 +27,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function Navbar() {
+export default function Navbar({
+  isLightPage = false,
+}: {
+  isLightPage?: boolean;
+}) {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +40,8 @@ export default function Navbar() {
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
   // const logout = useAuthStore((state) => state.logout);
+
+  const isBlackText = scrolled || isLightPage;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -101,7 +107,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
+      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
       <div className="custom-container h-16 md:h-20 flex items-center justify-between">
         {/* SISI KIRI: LOGO */}
@@ -114,7 +120,7 @@ export default function Navbar() {
             unoptimized
           />
           <span
-            className={`text-2xl font-bold tracking-tight ${scrolled ? "text-gray-900" : "text-white"}`}
+            className={`text-2xl font-bold tracking-tight ${isBlackText ? "text-gray-900" : "text-white"}`}
           >
             Foody
           </span>
@@ -134,14 +140,14 @@ export default function Navbar() {
                   alt="White bag"
                   width={32}
                   height={32}
-                  className={scrolled ? "hidden" : "block"}
+                  className={isBlackText ? "hidden" : "block"}
                 />
                 <Image
                   src="/icons/icon-bag-black.svg"
                   alt="Black bag"
                   width={32}
                   height={32}
-                  className={scrolled ? "block" : "hidden"}
+                  className={isBlackText ? "block" : "hidden"}
                 />
               </Link>
               {/* ROUTE TO PROFILE PAGE */}
@@ -159,7 +165,7 @@ export default function Navbar() {
                   />
                 </div>
                 <span
-                  className={`text-sm font-bold tracking-tight ${scrolled ? "text-gray-800" : "text-white"}`}
+                  className={`text-sm font-bold tracking-tight ${isBlackText ? "text-gray-800" : "text-white"}`}
                 >
                   {endUser.name}
                 </span>
