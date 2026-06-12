@@ -1,5 +1,9 @@
 import api from "@/lib/api/axios";
-import type { LoginInputs, RegisterUser } from "@/lib/validations/auth";
+import type {
+  LoginInputs,
+  RegisterUser,
+  UpdateUserInput,
+} from "@/lib/validations/auth";
 import type {
   EndUserProfile,
   EndUserProfileResponse,
@@ -27,6 +31,14 @@ export const authService = {
 
   profile: async (): Promise<EndUserProfileResponse> => {
     const response = await api.get<EndUserProfileResponse>("api/auth/profile");
+    return response.data;
+  },
+
+  update: async (payload: UpdateUserInput): Promise<EndUserProfileResponse> => {
+    const response = await api.put<EndUserProfileResponse>(
+      "api/auth/profile",
+      payload,
+    );
     return response.data;
   },
 };

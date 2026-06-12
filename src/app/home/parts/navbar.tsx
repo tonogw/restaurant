@@ -25,15 +25,17 @@ import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 // import { Button } from "@/components/ui/button";
 import { Eye, EyeClosed } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
-  const logout = useAuthStore((state) => state.logout);
+  // const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -60,6 +62,8 @@ export default function Navbar() {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       setErrorMessage(error.response?.data?.message || "Invalid credentials.");
+      // IF ERROR ROUTE TO /login
+      router.push("/login");
     },
   });
 
@@ -81,6 +85,7 @@ export default function Navbar() {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       setErrorMessage(error.response?.data?.message || "Registration failed.");
+      router.push("/register");
     },
   });
 
@@ -139,12 +144,10 @@ export default function Navbar() {
                   className={scrolled ? "block" : "hidden"}
                 />
               </Link>
-              <div
+              {/* ROUTE TO PROFILE PAGE */}
+              <Link
                 className="flex items-center gap-2 group cursor-pointer"
-                onClick={() => {
-                  logout();
-                  window.location.reload();
-                }}
+                href="/profile"
               >
                 <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500">
                   <Image
@@ -160,7 +163,7 @@ export default function Navbar() {
                 >
                   {endUser.name}
                 </span>
-              </div>
+              </Link>
             </div>
           ) : (
             // ================= SCREEN: BEFORE LOGIN =================
@@ -207,25 +210,27 @@ export default function Navbar() {
                         {...loginForm.register("email")}
                         className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
                       />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        autoComplete="current-password"
-                        {...loginForm.register("password")}
-                        className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      {/* TOGGLE SHOW PASSWORD */}
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                      >
-                        {showPassword ? (
-                          <EyeClosed size={16} />
-                        ) : (
-                          <Eye size={16} />
-                        )}
-                      </button>
+                      <div className="relative w-full">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          autoComplete="current-password"
+                          {...loginForm.register("password")}
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        {/* TOGGLE SHOW PASSWORD */}
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                        >
+                          {showPassword ? (
+                            <EyeClosed size={16} />
+                          ) : (
+                            <Eye size={16} />
+                          )}
+                        </button>
+                      </div>
 
                       <button
                         type="submit"
@@ -248,7 +253,7 @@ export default function Navbar() {
                   {/* Button variant="outline" otomatis memberikan border figma tipis tanpa ketik manual */}
                   <Button
                     variant="outline"
-                    className={`font-bold text-sm rounded-xl cursor-pointer ${scrolled ? "text-gray-700 border-gray-200 hover:bg-gray-50" : "text-white border-white/20 hover:bg-white/10"}`}
+                    className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${scrolled ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
                   >
                     Register
                   </Button>

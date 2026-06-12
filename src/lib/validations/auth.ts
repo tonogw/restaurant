@@ -30,3 +30,11 @@ export const loginSchema = z.object({
 });
 
 export type LoginInputs = z.infer<typeof loginSchema>;
+
+// Update endUser profile use existing by remove password
+export const UpdateProfileSchema = registerSchema.omit({
+  password: true,
+  confirmPassword: true,
+});
+
+export type UpdateUserInput = z.infer<typeof UpdateProfileSchema>;
