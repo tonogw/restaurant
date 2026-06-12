@@ -2,7 +2,7 @@
 // import RegisterPage from "./(auth)/register/page";
 import React, { useState, useEffect, FormEvent } from "react";
 import Image from "next/image";
-import Footer from "./home/parts/footer";
+import Footer from "@/components/shared/Footer";
 import Navbar from "./home/parts/navbar";
 import HeroSection from "@/app/home/parts/HeroSection";
 import { useQuery } from "@tanstack/react-query";
@@ -11,15 +11,6 @@ import { restoApi } from "@/lib/api/resto";
 import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import { categoryData } from "@/constant/category-data";
-// import Hero from "./home/parts/hero";
-// import { userInfo } from "os";
-
-// const CATEGORIES = [
-//   { name: "All Restaurant", icon: "🍔" },
-//   { name: "Nearby", icon: "📍" },
-//   { name: "Best Seller", icon: "🏆" },
-//   { name: "Lunch", icon: "Rice" },
-// ];
 
 export default function HomePage() {
   const router = useRouter();
@@ -29,10 +20,6 @@ export default function HomePage() {
   const currentCategory = searchParams.get("category") || "All Restaurant";
   const currentSearch = searchParams.get("search") || "";
   const [searchInput, setSearchInput] = useState(currentSearch);
-
-  // useEffect(() => {
-  //   setSearchInput(currentSearch);
-  // }, [currentSearch]);
 
   const updateParams = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -64,14 +51,6 @@ export default function HomePage() {
     >
       {/* NAVBAR */}
       <Navbar />
-      {/* <nav
-        className="w-full bg-black text-white px-6 md:px-16 py-4 
-      flex justify-between items-center
-      "
-      >
-        <span className="text-xl font-bold ">Foody</span>
-        <span className="text-sm font-semibold">userInfo</span>
-      </nav> */}
 
       {/* HERO COMPONENT */}
       <HeroSection
