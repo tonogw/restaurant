@@ -184,7 +184,7 @@ export default function Navbar({
                   {/* Button variant="ghost" murni kosmetik transparan sesuai bawaan Shadcn */}
                   <Button
                     variant="ghost"
-                    className={`font-bold text-sm rounded-xl border border-gray-400 px-14 py-2.25 cursor-pointer ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"}`}
+                    className={`font-bold text-sm rounded-xl border border-gray-400 px-14 py-2.25 cursor-pointer ${isBlackText ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"}`}
                   >
                     Sign In
                   </Button>
@@ -271,7 +271,7 @@ export default function Navbar({
                   {/* Button variant="outline" otomatis memberikan border figma tipis tanpa ketik manual */}
                   <Button
                     variant="outline"
-                    className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${scrolled ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
+                    className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${isBlackText ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
                   >
                     Register
                   </Button>
