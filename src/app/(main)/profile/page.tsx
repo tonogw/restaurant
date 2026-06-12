@@ -1,7 +1,7 @@
 // Isi File: src/app/(main)/profile/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -22,12 +22,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Span } from "next/dist/trace";
+import { Camera } from "lucide-react";
+import { file } from "zod";
+// import delAddress from "icons/"
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isOpen, setIsOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // HANDLE IMAGE STATE
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   //   FETCH PROFILE DATA
   const { data: profileData, isLoading } = useQuery({
@@ -37,6 +47,7 @@ export default function ProfilePage() {
 
   const endUser = profileData?.data;
 
+  const currentAvatar = endUser?.avatar || "/images/avatar-placeholder.png";
   //   INIT REACT HOOK FORM SCHEMA WITH OMIT
   const {
     register,
@@ -56,13 +67,50 @@ export default function ProfilePage() {
     }
   }, [endUser, setValue]);
 
-  // MUTATION PIPELINE
+  //   BROWSE FILE EXPLORER
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // MAXIMUM IMAGE FILE 2MB WITH FORMAT JPG/ PNG
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("File must be an image (.png/.jpg).");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("Image size must be less than 2MB.");
+      return;
+    }
+
+    setAvatarError(null);
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  // MUTATION PIPELINE TEXT + AVATAR
   const updateMutation = useMutation({
-    mutationFn: authService.update,
+    mutationFn: async (formData: UpdateUserInput) => {
+      // IMAGE FILE INCLUDED
+      const payload = new FormData();
+      payload.append("name", formData.name);
+      payload.append("email", formData.email);
+      payload.append("phone", formData.phone);
+
+      if (selectedFile) {
+        payload.append("avatar", selectedFile);
+      }
+
+      // PUSH API PUT
+      //   const response = await authService.update(payload as any);
+      //   return response;
+      return await authService.update(payload);
+    },
+
     onSuccess: () => {
-      setSuccessMessage("Profile update successfully!");
+      setSuccessMessage("Profile or Photo updated successfully!");
       setErrorMessage(null);
       setIsOpen(false);
+      setSelectedFile(null);
 
       // FORCE SYNC DATA
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -72,7 +120,7 @@ export default function ProfilePage() {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       setErrorMessage(
-        error.response?.data?.message || "Failed to update prorfile.",
+        error.response?.data?.message || "Failed to update profile.",
       );
       setSuccessMessage(null);
     },
@@ -99,7 +147,8 @@ export default function ProfilePage() {
           <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100">
               <Image
-                src={endUser?.avatar || "/images/avatar-placeholder.png"}
+                // src={endUser?.avatar || "/images/avatar-placeholder.png"}
+                src={currentAvatar}
                 alt="avatar"
                 width={48}
                 height={48}
@@ -113,13 +162,31 @@ export default function ProfilePage() {
           </div>
           <nav className="flex flex-col gap-2 font-semibold text-sm text-gray-600">
             <button className="flex items-center gap-3 px-3 py-2.5 text-[#B81E1E] bg-red-50/50 rounded-xl w-full text-left">
-              📍 Delivery Address
+              <Image
+                src="/icons/icon-delivery-address.svg"
+                alt="Icon location"
+                width={24}
+                height={24}
+              />
+              Delivery Address
             </button>
             <button className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl w-full text-left">
-              📄 My Orders
+              <Image
+                src="/icons/icon-my-order.svg"
+                alt="Icon my Orders"
+                width={24}
+                height={24}
+              />
+              My Orders
             </button>
             <button className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 text-red-600 rounded-xl w-full text-left mt-4 border-t border-gray-50 pt-4">
-              🔒 Logout
+              <Image
+                src="/icons/icon-logout.svg"
+                alt="icon logout"
+                width={24}
+                height={24}
+              />
+              Logout
             </button>
           </nav>
         </aside>
@@ -146,7 +213,8 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-amber-500 shadow-sm">
               <Image
-                src={endUser?.avatar || "/images/avatar-placeholder.png"}
+                // src={endUser?.avatar || "/images/avatar-placeholder.png"}
+                src={currentAvatar}
                 alt="Profile Pic"
                 width={120}
                 height={120}
@@ -194,6 +262,49 @@ export default function ProfilePage() {
                     Update Profile of Name and Phone number
                   </SheetDescription>
                 </SheetHeader>
+
+                {/* PICTURE PROFILE UPDATE */}
+                <div className="w-full flex flex-col items-center gap-2 my-4">
+                  <div className="relative w-24 h-24 rouded-full overflow-hidden border-2 border-dashed border-gray-300 bg-grayy-50 group">
+                    <Image
+                      src={previewUrl || currentAvatar}
+                      alt="Preview Avatar"
+                      fill
+                      className="object-cover"
+                    />
+                    {/* HOVER BUTTON */}
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <Camera size={20} className="text-white fill-gray-800" />
+                    </div>
+                  </div>
+
+                  {/* BUTTON TO BROWSE */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-bold text-[#C12116] hover:underline cursor-pointer"
+                  >
+                    {selectedFile ? "Change Selected Photo" : "Edit Photo"}
+                  </button>
+                  {/* FILE EXPLORER */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/png, image/jpeg, image/jpg"
+                    className="hidden"
+                  />
+                  {/* ALLERT IF DIFF FILE FORMAT */}
+                  {avatarError && (
+                    <span className="text-red-600 text-xs font-bold mt-1">
+                      ⚠ {avatarError}
+                    </span>
+                  )}
+                </div>
+
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   className="space-y-5 mt-2"
@@ -246,7 +357,10 @@ export default function ProfilePage() {
                       </span>
                     )}
                   </div>
-                  <button type="submit">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#C12116] hover:bg-[#961818] text-white font-bold py-4 rounded-full transition-all mt-4 shadow-md cursor-pointer text-sm disabled:bg-gray-100 disabled:text-gray-400"
+                  >
                     {updateMutation.isPending
                       ? "Saving New Data..."
                       : "Save Changes"}

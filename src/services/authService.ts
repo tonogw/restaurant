@@ -34,10 +34,21 @@ export const authService = {
     return response.data;
   },
 
-  update: async (payload: UpdateUserInput): Promise<EndUserProfileResponse> => {
+  update: async (
+    payload: FormData | UpdateUserInput,
+  ): Promise<EndUserProfileResponse> => {
+    // CONTENT TYPE SELECTION
+    const headers =
+      payload instanceof FormData
+        ? { "Content-Type": "multipart/form-data" }
+        : undefined;
+
     const response = await api.put<EndUserProfileResponse>(
       "api/auth/profile",
       payload,
+      {
+        headers,
+      },
     );
     return response.data;
   },
