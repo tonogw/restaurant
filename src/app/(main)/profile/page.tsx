@@ -13,12 +13,23 @@ import {
 } from "@/lib/validations/auth";
 import { AxiosError } from "axios";
 import Navbar from "@/app/home/parts/navbar";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Span } from "next/dist/trace";
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  //   FETCH PROFILE DATA
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["user-profile"],
     queryFn: authService.profile,
@@ -36,7 +47,7 @@ export default function ProfilePage() {
     resolver: zodResolver(UpdateProfileSchema),
   });
 
-  // SYNC DATA PRIOR UPDATE
+  // SYNC DATA DEFAULT PRIOR UPDATE
   useEffect(() => {
     if (endUser) {
       setValue("name", endUser.name);
@@ -51,6 +62,7 @@ export default function ProfilePage() {
     onSuccess: () => {
       setSuccessMessage("Profile update successfully!");
       setErrorMessage(null);
+      setIsOpen(false);
 
       // FORCE SYNC DATA
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -160,9 +172,89 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button className="w-full max-w-xl bg-[#C12116] hover:bg-[#961818] text-white font-bold py-3.5 rounded-full transition-all mt-6 shadow-sm cursor-pointer">
-            Update Profile
-          </button>
+          {/* SHEET BOTTOM SIDE */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <button className="w-131 max-w-xl bg-[#C12116] hover:bg-[#961818] text-white font-bold py-3.5 rounded-full transition-all mt-6 shadow-sm cursor-pointer">
+                Update Profile
+              </button>
+            </SheetTrigger>
+
+            {/* DRAW SHEET FROM BUTTON  */}
+            <SheetContent
+              side="bottom"
+              className="h-[75vh] bg-white rounded-t-[32px] p-8 border-t border-gray-100 shadow-2xl flex flex-col items-center"
+            >
+              <div className="w-131 max-w-xl">
+                <SheetHeader className="text-left mb-6">
+                  <SheetTitle className="text-2xl font-extrabold text-gray-900 ">
+                    Edit Profile Information
+                  </SheetTitle>
+                  <SheetDescription className="text-gray-400 text-sm">
+                    Update Profile of Name and Phone number
+                  </SheetDescription>
+                </SheetHeader>
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="space-y-5 mt-2"
+                >
+                  {/* FULL NAME */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      {...register("name")}
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"
+                    />
+                    {errors.name && (
+                      <span className="text-red-600 text-xs font-bold pl-1">
+                        {errors.name.message}{" "}
+                      </span>
+                    )}
+                  </div>
+                  {/* EMAIL ADDRESS */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      {...register("email")}
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"
+                    />
+                    {errors.email && (
+                      <span className="text-red-600 text-xs font-bold pl-1">
+                        {errors.email.message}{" "}
+                      </span>
+                    )}
+                  </div>
+                  {/* PHONE NUMBER */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider pl-1">
+                      Handphone Number
+                    </label>
+                    <input
+                      type="text"
+                      {...register("phone")}
+                      className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm font-semibold focus:ring-1 focus:ring-[#C12116] bg-gray-50/20"
+                    />
+                    {errors.phone && (
+                      <span className="text-red-600 text-xs font-bold pl-1">
+                        {errors.phone.message}{" "}
+                      </span>
+                    )}
+                  </div>
+                  <button type="submit">
+                    {updateMutation.isPending
+                      ? "Saving New Data..."
+                      : "Save Changes"}
+                  </button>
+                </form>
+              </div>
+            </SheetContent>
+          </Sheet>
         </main>
       </div>
     </div>
