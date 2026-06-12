@@ -131,9 +131,9 @@ export interface DetailResponse {
         logo: string;
         images: [];
         category: string;
-        reviewCount: number;
-        menuCount: number;
-        priceRange: {
+        review_count: number;
+        menu_count: number;
+        price_range: {
           min: number;
           max: number;
         };
@@ -150,7 +150,7 @@ export interface RestoResponse {
       page: number;
       limit: number;
       total: number;
-      totalPage: number;
+      total_page: number;
     };
   };
 }
@@ -163,9 +163,9 @@ export interface RestaurantItem {
   logo: string;
   image: string[];
   category: string;
-  reviewCount: number;
-  menuCount: number;
-  priceRange: {
+  review_count: number;
+  menu_count: number;
+  price_range: {
     min: number;
     max: number;
   };
@@ -180,7 +180,7 @@ export interface RecommendationItem {
   lat: number;
   long: number;
   logo: string;
-  images: string[]; // Ini yang akan kita pakai untuk backdrop
+  images: string[];
   category: string;
   reviewCount: number;
   isFrequentlyOrdered: boolean;
@@ -203,3 +203,120 @@ export interface RecommendationResponse {
 }
 
 export interface MyOrder {}
+
+export interface RestoDetailResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    star: number;
+    averageRating: number;
+    place: string;
+    coordinates: {
+      lat: number;
+      long: number;
+    };
+    logo: string;
+    images: string[];
+    category: string;
+    total_menus: number;
+    total_reviews: number;
+    menus: {
+      id: number;
+      food_name: string;
+      price: number;
+      type: string;
+      image: string;
+    }[];
+    reviews: {
+      id: number;
+      star: number;
+      comment: string | null;
+      createdAt: string;
+      user: {
+        id: number;
+        name: string;
+        avatar: string | null;
+      };
+    }[];
+  };
+}
+
+export interface MenuItem {
+  id: number;
+  food_name: string;
+  price: number;
+  type: string; //"food" | "drink";
+  image: string;
+}
+
+export interface Coordinates {
+  lat: number;
+  long: number;
+}
+
+export interface ReviewItem {
+  id: number;
+  star: number;
+  comment: string | null;
+  createdAt: string;
+  user: {
+    id: number;
+    name: string;
+    avatar: string | null;
+  };
+}
+
+export interface RestaurantDetail {
+  id: number;
+  name: string;
+  star: number;
+  average_rating: number;
+  place: string;
+  coordinates: Coordinates;
+  logo: string;
+  images: string[];
+  category: string;
+  total_menus: number;
+  total_reviews: number;
+  menus: MenuItem[];
+  reviews: ReviewItem[];
+}
+
+export interface RestoDetailResponse {
+  success: boolean;
+  message: string;
+  data: RestaurantDetail;
+}
+
+export interface CartItemDetail {
+  id: number;
+  menu: MenuItem;
+  quantity: number;
+  item_total: number;
+}
+
+export interface CartGroup {
+  restaurant: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  items: CartItemDetail[];
+  subtotal: number;
+}
+
+export interface CartSummary {
+  total_items: number;
+  total_price: number;
+  restaurant_count: number;
+}
+
+export interface CartResponse {
+  success: boolean;
+  data: {
+    cart: CartGroup[];
+    summary: CartSummary;
+  };
+}

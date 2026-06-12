@@ -138,8 +138,8 @@ export default function Navbar({
                 <Image
                   src="/icons/icon-bag-white.svg"
                   alt="White bag"
-                  width={32}
-                  height={32}
+                  width="24"
+                  height="24"
                   className={isBlackText ? "hidden" : "block"}
                 />
                 <Image
