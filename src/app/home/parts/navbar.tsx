@@ -191,7 +191,7 @@ export default function Navbar({
                 </SheetTrigger>
                 <SheetContent
                   side="right"
-                  className="w-full sm:max-w-md lg:max-w-180  p-8 flex items-center justify-center border-l border-gray-100"
+                  className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
                 >
                   <AuthCard
                     title="Welcome Back"
@@ -233,9 +233,19 @@ export default function Navbar({
                           className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
                         >
                           {showPassword ? (
-                            <EyeClosed size={16} />
+                            <Image
+                              src="/icons/icon-eye-off.svg"
+                              alt="icon sebuah mata menutup"
+                              width={24}
+                              height={24}
+                            />
                           ) : (
-                            <Eye size={16} />
+                            <Image
+                              src="/icons/icon-eye.svg"
+                              alt="icon sebuat mata"
+                              width={24}
+                              height={24}
+                            />
                           )}
                         </button>
                       </div>
@@ -306,47 +316,60 @@ export default function Navbar({
                         {...registerForm.register("phone")}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                       />
-                      <input
-                        id="new-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        autoComplete="new-password"
-                        {...registerForm.register("password")}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      {/* TOGGLE SHOW PASSWORD */}
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                      >
-                        {showPassword ? (
-                          <EyeClosed size={16} />
-                        ) : (
-                          <Eye size={16} />
-                        )}
-                      </button>
-
-                      <input
-                        id="new-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Confirm Password"
-                        autoComplete="new-password"
-                        {...registerForm.register("confirmPassword")}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      {/* TOGGLE SHOW PASSWORD */}
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                      >
-                        {showPassword ? (
-                          <EyeClosed size={16} />
-                        ) : (
-                          <Eye size={16} />
-                        )}
-                      </button>
+                      <div className="relative w-full">
+                        <input
+                          id="nav-new-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          autoComplete="new-password"
+                          {...registerForm.register("password")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        {/* TOGGLE SHOW PASSWORD */}
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                        >
+                          <Image
+                            src={
+                              showPassword
+                                ? "/icons/icon-eye.svg"
+                                : "/icons/icon-eye-off.svg"
+                            }
+                            alt="toggle password visibility"
+                            width={24}
+                            height={24}
+                          />
+                        </button>
+                      </div>
+                      <div className="relative w-full ">
+                        <input
+                          id="nav-confirm-new-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Confirm Password"
+                          autoComplete="new-password"
+                          {...registerForm.register("confirmPassword")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        {/* TOGGLE SHOW PASSWORD */}
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                        >
+                          <Image
+                            src={
+                              showPassword
+                                ? "/icons/icon-eye.svg"
+                                : "/icons/icon-eye-off.svg"
+                            }
+                            alt="toggle password visibility"
+                            width={24}
+                            height={24}
+                          />
+                        </button>
+                      </div>
 
                       <button
                         type="submit"

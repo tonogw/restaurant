@@ -152,7 +152,7 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-1">
               <div className="relative w-full">
                 <input
-                  id="new-password"
+                  id="regiter-new-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   {...register("password")}
@@ -164,7 +164,21 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-semibold select-none cursor-pointer"
                 >
-                  {showPassword ? <Eye /> : <EyeClosed />}
+                  {showPassword ? (
+                    <Image
+                      src="/icons/icon-eye.svg"
+                      alt="Icon an eye"
+                      width={24}
+                      height={24}
+                    />
+                  ) : (
+                    <Image
+                      src="/icons/icon-eye-off.svg"
+                      alt="icon an eye closed"
+                      width={24}
+                      height={24}
+                    />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -178,7 +192,7 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-1">
               <div className="relative w-full">
                 <input
-                  id="new-password"
+                  id="register-confirm-new-password"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   {...register("confirmPassword")}
@@ -190,7 +204,21 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-semibold select-none cursor-pointer"
                 >
-                  {showConfirmPassword ? <Eye /> : <EyeClosed />}
+                  {showConfirmPassword ? (
+                    <Image
+                      src="/icons/icon-eye.svg"
+                      alt="Icon an eye"
+                      width={24}
+                      height={24}
+                    />
+                  ) : (
+                    <Image
+                      src="/icons/icon-eye-off.svg"
+                      alt="icon an eye closed"
+                      width={24}
+                      height={24}
+                    />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (

@@ -12,13 +12,6 @@ import Image from "next/image";
 import LBurger from "../../../../public/images/Image-landscape-burger.png";
 import AuthCard from "@/components/shared/AuthCard";
 import Link from "next/link";
-import { Span } from "next/dist/trace";
-import { Eye, EyeClosed } from "lucide-react";
-
-// type Inputs = {
-//   example: string;
-//   exampleRequired: string;
-// };
 
 interface ApiErrorResponse {
   message?: string;
@@ -114,7 +107,7 @@ export default function LoginPage() {
             {/* Input Password */}
             <div className="relative w-full">
               <input
-                id="current-password"
+                id="login-current-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 {...register("password")}
@@ -124,6 +117,15 @@ export default function LoginPage() {
             focus:outline-hidden focus:border-gray-400 transition-all
             placeholder:text-gray-400"
               />
+              {errors.password && (
+                <span
+                  className="
+          text-red-600 text-xs font-semibold pl-1
+          "
+                >
+                  {errors.password.message}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -131,7 +133,16 @@ export default function LoginPage() {
             text-xs font-semibold select-none cursor-pointer
             "
               >
-                {showPassword ? <Eye /> : <EyeClosed />}
+                <Image
+                  src={
+                    showPassword
+                      ? "/icons/icon-eye.svg"
+                      : "icons/icon-eye-off.svg"
+                  }
+                  alt="toggle password visibility"
+                  width={24}
+                  height={24}
+                />
               </button>
             </div>
 
