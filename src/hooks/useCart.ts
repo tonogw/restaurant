@@ -6,7 +6,7 @@ export const useAddToCart = () => {
   const QueryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { menu_id: number; quantity: number }) => {
+    mutationFn: async (payload: { menuId: number; quantity: number }) => {
       const response = await api.post("/api/cart", payload);
       return response.data;
     },

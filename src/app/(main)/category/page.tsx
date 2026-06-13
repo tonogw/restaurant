@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
-import Navbar from "@/app/home/parts/navbar";
-import Footer from "@/app/home/parts/footer";
+import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import { Star } from "lucide-react";
@@ -13,6 +13,9 @@ import { Star } from "lucide-react";
 export default function CategoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  import { authService } from "@/services/authService";
+  import { cartService } from "@/services/cartService";
 
   const currentSearch = searchParams.get("search") || "";
   const currentCategory = searchParams.get("category") || "All Restaurant";

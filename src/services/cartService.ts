@@ -23,8 +23,11 @@ export const cartService = {
   },
 
   // Ubah jumlah pesanan makanan (PUT /api/cart)
-  updateQuantity: async (id: number, quantity: number) => {
-    const response = await api.put("/api/cart", { id, quantity });
+  updateQuantity: async (cartItemId: number, quantity: number) => {
+    const response = await api.put("/api/cart", {
+      id: cartItemId,
+      quantity: quantity,
+    });
     return response.data;
   },
 

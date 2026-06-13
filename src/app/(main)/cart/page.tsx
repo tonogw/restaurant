@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/app/home/parts/navbar";
-import Footer from "@/app/home/parts/footer";
-import { Trash2, Plus, Minus } from "lucide-react";
+import Footer from "@/components/shared/Footer";
+// import { Trash2, Plus, Minus } from "lucide-react";
+// import IconPlus from "/icons/icon-icon-plus.svg";
+// import IconMinus from "/icon/icon-minus.svg";
+
 import type {
   MenuItem,
   CartItemDetail,
@@ -110,16 +113,16 @@ export default function CartPage() {
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                         <Image
                           src={item.menu.image}
-                          alt={item.menu.foodName}
+                          alt={item.menu.food_name}
                           fill
                           className="object-cover"
                         />
                       </div>
 
-                      {/* Detail Teks Nama Makanan */}
+                      {/* Menu Name */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-gray-900 text-sm truncate">
-                          {item.menu.foodName}
+                          {item.menu.food_name}
                         </h3>
                         <p className="text-xs font-extrabold text-gray-400 mt-1">
                           Rp {item.menu.price.toLocaleString("id-ID")}
@@ -140,7 +143,13 @@ export default function CartPage() {
                           }
                           className="text-gray-500 hover:text-gray-900 disabled:opacity-30 cursor-pointer"
                         >
-                          <Minus size={14} />
+                          {/* <Minus size={14} /> */}
+                          <Image
+                            src="/icons/icon-minus.svg"
+                            alt="minus"
+                            width={14}
+                            height={14}
+                          />
                         </button>
                         <span className="text-xs font-bold text-gray-900 w-4 text-center">
                           {item.quantity}
@@ -155,7 +164,13 @@ export default function CartPage() {
                           }
                           className="text-gray-500 hover:text-gray-900 cursor-pointer"
                         >
-                          <Plus size={14} />
+                          {/* <Plus size={14} /> */}
+                          <Image
+                            src="/icons/icon-plus.svg"
+                            alt="plus"
+                            width={14}
+                            height={14}
+                          />
                         </button>
                       </div>
 
@@ -167,7 +182,13 @@ export default function CartPage() {
                         }}
                         className="p-2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer flex-shrink-0"
                       >
-                        <Trash2 size={16} />
+                        {/* <Trash2 size={16} /> */}
+                        <Image
+                          src="/icons/icon-trash.svg"
+                          alt="trash"
+                          width={14}
+                          height={14}
+                        />
                       </button>
                     </div>
                   ))}
@@ -187,14 +208,14 @@ export default function CartPage() {
           <div className="flex justify-between text-sm font-semibold text-gray-500">
             <span>Total Items</span>
             <span className="text-gray-900 font-bold">
-              {summary?.totalItems || 0} items
+              {summary?.itemTotal || 0} items
             </span>
           </div>
 
           <div className="flex justify-between items-center text-sm font-semibold text-gray-500 border-t border-gray-50 pt-3 mt-1">
             <span>Total Price</span>
             <span className="text-xl font-extrabold text-[#C12116]">
-              Rp {summary?.totalPrice.toLocaleString("id-ID") || 0}
+              Rp {summary?.totalPrice || 0}
             </span>
           </div>
 

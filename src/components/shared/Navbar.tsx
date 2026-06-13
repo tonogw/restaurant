@@ -1,8 +1,10 @@
 "use client";
 
-import { AxiosError } from "axios";
-import Image from "next/image";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,21 +14,16 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AuthCard from "@/components/shared/AuthCard";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/authService";
 import { cartService } from "@/services/cartService";
-import Link from "next/link";
-// import whiteBag from "@/public/icons/icon-bag-white.svg";
-// import blackBag from "@/public/icons/icon-bag-black.svg";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { LoginInputs, loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { Button } from "@/components/ui/button";
-import { Eye, EyeClosed } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { navbarLinks } from "@/constant/navbar-data";
 
 export default function Navbar({
   isLightPage = false,

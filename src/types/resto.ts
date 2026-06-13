@@ -304,12 +304,13 @@ export interface CartGroup {
     logo: string;
   };
   items: CartItemDetail[];
+  id: number;
   subtotal: number;
 }
 
 export interface CartSummary {
-  total_items: number;
-  total_price: number;
+  itemTotal: number;
+  totalPrice: number;
   restaurant_count: number;
 }
 
