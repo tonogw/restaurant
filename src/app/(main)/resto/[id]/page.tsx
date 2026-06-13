@@ -8,7 +8,7 @@ import { cartService } from "@/services/cartService";
 import Navbar from "@/app/home/parts/navbar";
 import Footer from "@/components/shared/Footer";
 import MenuCard from "@/components/shared/MenuCard"; // ✓ Memanggil komponen shared
-import { Share2, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import type { RestoDetailResponse } from "@/types/resto";
 
 interface RestoDetailPageProps {
@@ -171,14 +171,22 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
               </div>
             </div>
           </div>
-          <button className="flex items-center gap-2 border border-gray-200 px-5 py-2.5 rounded-full text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 shadow-xs cursor-pointer">
-            <Share2 size={16} /> Share
+          <button className="px-7.75 h-11 flex items-center gap-2 border border-gray-200 py-2.5 rounded-full font-bold text-gray-700 bg-white hover:bg-gray-50 shadow-xs cursor-pointer">
+            {/* <Share2 size={16} /> Share */}
+            <Image
+              src="/icons/icon-share.svg"
+              alt="share"
+              width={24}
+              height={20}
+              className="w-5 md:w-6 h-auto"
+            />
+            <span className="hidden md:flex">Share</span>
           </button>
         </div>
       </div>
 
       {/* ================= BLOK MENU ================= */}
-      <main className="max-w-[1200px] w-full mx-auto px-6 py-[32px] flex flex-col gap-6">
+      <main className="max-w-300 w-full mx-auto px-6 py-[32px] flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
             Menu
@@ -205,7 +213,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         </div>
 
         {/* ✓ FIXED: GRID CONTAINER MENUCARD MEMAKAI KOMPONEN SHARED YANG PRESISI FIGMA 2 KOLOM */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] mt-2">
+        <div className="grid grid-cols-2  md:grid-cols-2 lg:grid-cols-4 gap-[20px] mt-2">
           {filteredMenus.map((menu) => (
             <MenuCard
               key={menu.id}
