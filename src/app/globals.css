@@ -192,7 +192,7 @@
 
 @utility custom-container {
   margin: 0 auto;
-  @apply max-w-90.25 md:max-w-174.5 lg:max-w-300;
+  @apply max-w-90.25 md:max-w-159.5 lg:max-w-300;
 }
 
 @utility flex-center {
