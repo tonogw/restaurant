@@ -1,4 +1,5 @@
 // Kontrak Tipe Data Props untuk MenuCard
+
 export interface MenuCardProps {
   menu: {
     id: number;

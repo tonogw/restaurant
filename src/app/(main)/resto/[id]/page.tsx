@@ -5,11 +5,12 @@ import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
 import { cartService } from "@/services/cartService";
-import Navbar from "@/app/home/parts/navbar";
+import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
-import MenuCard from "@/components/shared/MenuCard"; // ✓ Memanggil komponen shared
+import MenuCard from "@/components/shared/MenuCard";
 import { Star } from "lucide-react";
 import type { RestoDetailResponse } from "@/types/resto";
+import { Menu } from "@/constant/menu-data";
 
 interface RestoDetailPageProps {
   params: Promise<{ id: string }>;
@@ -19,12 +20,13 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const queryClient = useQueryClient();
   const { id } = React.use(params);
 
-  // State Filter Kategori Internal Menu
-  const [activeMenuTab, setActiveMenuTab] = useState<"All" | "Food" | "Drink">(
-    "All",
-  );
+  // State Filter Kategori Menu
+  const [activeMenuTab, setActiveMenuTab] = useState<Menu>("All");
 
-  // 1. FETCH DATA REAL-TIME DARI BACKEND RAILWAY
+  // State Sederhana untuk mengontrol display gambar aktif di Mobile (0, 1, 2, atau 3)
+  const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+
+  // 1. FETCH DATA REAL-TIME
   const {
     data: restoResponse,
     isLoading,
@@ -34,7 +36,6 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
     queryFn: () => restoApi.getRestoDetail(id),
   });
 
-  // Fetch data isi keranjang untuk mendeteksi apakah menu sudah pernah di-add
   const { data: cartResponse } = useQuery({
     queryKey: ["user-cart"],
     queryFn: cartService.getCart,
@@ -43,27 +44,33 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const resto = restoResponse?.data;
   const cartGroups = cartResponse?.data?.cart || [];
 
-  // 2. MUTASI TAMBAH ITEM (POST /api/cart)
+  // 2. MUTASI TAMBAH ITEM
   const addToCartMutation = useMutation({
     mutationFn: (menuId: number) =>
       cartService.addToCart(menuId, Number(id), 1),
     onSuccess: () => {
-      // ✓ FIXED: Parameter 'res: any' dihapus untuk menghilangkan eror merah TypeScript
       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
     },
-    onError: () => alert("Gagal menambah item. Pastikan Anda sudah login."),
+    onError: () => alert("Failed add menu item. Ensure you're already login."),
   });
 
-  // 3. MUTASI UBAH JUMLAH PORSI (PUT /api/cart)
+  // 3. MUTASI UBAH JUMLAH PORSI
   const updateQtyMutation = useMutation({
-    mutationFn: ({ cartItemId, qty }: { cartItemId: number; qty: number }) =>
-      cartService.updateQuantity(cartItemId, qty),
+    mutationFn: ({ cartItemId, qty }: { cartItemId: number; qty: number }) => {
+      if (qty <= 0) {
+        // If it's become 0 then delete
+        return cartService.deleteItem(cartItemId);
+      }
+      // Otherwise update perusal
+      return cartService.updateQuantity(cartItemId, qty);
+
+      // cartService.updateQuantity(cartItemId, qty),
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
     },
   });
 
-  // Helper untuk mendeteksi status quantity item di dalam database keranjang
   const getCartItemState = (menuId: number) => {
     for (const group of cartGroups) {
       const match = group.items.find((item) => item.menu.id === menuId);
@@ -88,48 +95,87 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
     );
   }
 
-  // Filter menu lokal berdasarkan tombol tab yang aktif
   const filteredMenus =
     resto.menus?.filter((menu) => {
       if (activeMenuTab === "All") return true;
       return menu.type.toLowerCase() === activeMenuTab.toLowerCase();
     }) || [];
 
-  return (
-    <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 flex flex-col">
-      <Navbar isLightPage={true} />
+  const displayImages = [
+    resto.images?.[0] || resto.logo,
+    resto.images?.[1] || resto.logo,
+    resto.images?.[2] || resto.logo,
+    resto.images?.[3] || resto.logo,
+  ];
 
-      {/* CONTAINER BANNER/BACKDROP (1200px x 622px) */}
-      <div className="max-w-[1200px] w-full mx-auto px-6 mt-4 flex flex-col gap-[32px]">
-        {/* BARIS ATAS: MOSAIC IMAGES GRID */}
-        <div className="w-full flex gap-[20px] h-[470px]">
-          {/* Foto Kiri Besar (651px x 470px) */}
-          <div className="w-[651px] h-[470px] relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
+  // const totalCartItems = cartGroups.reduce((total, group) => {
+  //   return total + group.items.reduce((sum, item) => sum + item.quantity, 0);
+  // }, 0);
+
+  const badgeCount = cartResponse?.data?.summary?.totalItems || 0;
+
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-16 md:pt-24 flex flex-col">
+      <Navbar isLightPage={true} cartCount={badgeCount} />
+
+      {/* WRAPPER UTAMA RESPONSIF */}
+      <div className="max-w-300 w-full mx-auto mt-4 flex flex-col gap-6 md:gap-8  md:px-6">
+        {/* ==================================================== */}
+        {/* 1. AREA BANNER BARIS ATAS */}
+        {/* ==================================================== */}
+
+        {/* VIEW MOBILE (w-393): Hanya 1 gambar tampil 361x260, sisanya sembunyi & bisa di-scrollX */}
+        <div className="block md:hidden w-full max-w-90.25 mx-auto">
+          <div className="w-full h-65 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
             <Image
-              src={resto.images?.[0] || resto.logo}
-              alt="Main Banner"
+              src={displayImages[activeBannerIdx]}
+              alt="Mobile Banner Active"
+              fill
+              className="object-cover transition-all duration-300"
+            />
+          </div>
+          {/* Indikator 3 Titik Figma di bawah Gambar Mobile (Merah = Aktif, Gray = Hidden) */}
+          <div className="flex justify-center items-center gap-2 mt-3">
+            {displayImages.slice(0, 3).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveBannerIdx(idx)}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  activeBannerIdx === idx
+                    ? "w-6 bg-[#C12116]"
+                    : "w-2 bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* VIEW DESKTOP: Mosaik Grid Mewah */}
+        <div className="hidden md:flex w-full gap-5 h-117.5">
+          {/* Foto Kiri Besar */}
+          <div className="w-162.75 h-117.5 relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
+            <Image
+              src={displayImages[0]}
+              alt="Main Desktop Banner"
               fill
               priority
               className="object-cover"
             />
           </div>
-
           {/* Kanan: Susunan Bertingkat */}
-          <div className="flex-1 flex flex-col gap-[20px]">
-            {/* Atas (529px x 302px) */}
-            <div className="w-full h-[302px] relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
+          <div className="flex-1 flex flex-col gap-5">
+            <div className="w-full h-70.5 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
               <Image
-                src={resto.images?.[1] || resto.images?.[0] || resto.logo}
+                src={displayImages[1]}
                 alt="Banner 2"
                 fill
                 className="object-cover"
               />
             </div>
-            {/* Bawah (2 Foto Sejajar: 254px x 148px) */}
-            <div className="flex gap-[20px] h-[148px]">
+            <div className="flex gap-5 h-37">
               <div className="flex-1 relative rounded-[24px] overflow-hidden bg-gray-100 shadow-xs">
                 <Image
-                  src={resto.images?.[2] || resto.logo}
+                  src={displayImages[2]}
                   alt="Banner 3"
                   fill
                   className="object-cover"
@@ -137,7 +183,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
               </div>
               <div className="flex-1 relative rounded-[24px] overflow-hidden bg-gray-100 shadow-xs">
                 <Image
-                  src={resto.images?.[3] || resto.logo}
+                  src={displayImages[3]}
                   alt="Banner 4"
                   fill
                   className="object-cover"
@@ -147,10 +193,13 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
         </div>
 
-        {/* BARIS BAWAH: LOGO RESTO & INFO UTAMA */}
-        <div className="w-full flex items-center justify-between border-b border-gray-100 pb-[32px]">
-          <div className="flex items-center gap-5">
-            <div className="relative w-[80px] h-[80px] rounded-full overflow-hidden border border-gray-100 bg-white shadow-xs">
+        {/* ==================================================== */}
+        {/* 2. BLOK RESTO INFO (Mobile: 361x90, 2 Kolom) */}
+        {/* ==================================================== */}
+        <div className="w-full max-w-90.25 md:max-w-none mx-auto flex items-center justify-between border-b border-gray-100 pb-6 md:pb-8 h-22.5">
+          {/* KOLOM 1: Logo Resto (90x90 di Mobile) + Info Resto (148x90 di Mobile) */}
+          <div className="flex items-center gap-3 md:gap-5 h-full">
+            <div className="relative w-22.5 h-22.5 md:w-20 md:h-20 rounded-full overflow-hidden border border-gray-100 bg-white shadow-xs shrink-0">
               <Image
                 src={resto.logo}
                 alt={resto.name}
@@ -158,40 +207,43 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                 className="object-cover p-1"
               />
             </div>
-            <div className="space-y-1">
-              <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+            <div className="flex flex-col justify-center h-22.5 w-37 md:w-auto space-y-0.5">
+              <h2 className="text-base md:text-2xl font-extrabold text-gray-900 tracking-tight truncate w-full">
                 {resto.name}
               </h2>
-              <div className="flex items-center gap-3 text-sm font-bold text-gray-500">
-                <span className="flex items-center gap-1 text-amber-500">
+              <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-gray-500">
+                <span className="flex items-center gap-0.5 text-[#0A0D12]">
                   ★ {resto.averageRating || resto.star}
                 </span>
                 <span>•</span>
-                <span>{resto.place} • 2.4 km</span>
+                <span className="truncate">{resto.place} • 2.4 km</span>
               </div>
             </div>
           </div>
-          <button className="px-7.75 h-11 flex items-center gap-2 border border-gray-200 py-2.5 rounded-full font-bold text-gray-700 bg-white hover:bg-gray-50 shadow-xs cursor-pointer">
-            {/* <Share2 size={16} /> Share */}
-            <Image
-              src="/icons/icon-share.svg"
-              alt="share"
-              width={24}
-              height={20}
-              className="w-5 md:w-6 h-auto"
-            />
-            <span className="hidden md:flex">Share</span>
-          </button>
+
+          {/* KOLOM 2: Icon Share Bulat (44x44), Rata Kanan Tengah / Middle */}
+          <div className="flex items-center justify-end">
+            <button className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
+              <Image
+                src="/icons/icon-share.svg"
+                alt="share"
+                width={20}
+                height={20}
+                className="object-contain"
+              />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ================= BLOK MENU ================= */}
-      <main className="max-w-300 w-full mx-auto px-6 py-[32px] flex flex-col gap-6">
+      {/* ==================================================== */}
+      {/* 3. BLOK GRID MENU (Mobile: grid-cols-2 dengan gap-4) */}
+      {/* ==================================================== */}
+      <main className="max-w-300 w-full mx-auto   py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight">
             Menu
           </h2>
-          {/* Tiga Tombol Filter Kategori */}
           <div className="flex items-center gap-2.5">
             {(["All Menu", "Food", "Drink"] as const).map((tab) => (
               <button
@@ -199,7 +251,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                 onClick={() =>
                   setActiveMenuTab(tab === "All Menu" ? "All" : tab)
                 }
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                className={`px-4 py-1.5  md:py-2 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                   (tab === "All Menu" && activeMenuTab === "All") ||
                   activeMenuTab === tab
                     ? "bg-[#C12116] text-white border-transparent shadow-xs"
@@ -212,8 +264,8 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
         </div>
 
-        {/* ✓ FIXED: GRID CONTAINER MENUCARD MEMAKAI KOMPONEN SHARED YANG PRESISI FIGMA 2 KOLOM */}
-        <div className="grid grid-cols-2  md:grid-cols-2 lg:grid-cols-4 gap-[20px] mt-2">
+        {/* GRID CONTAINER MENUCARD: Mobile 2 Kolom menyamping, Desktop tetap 4 Kolom */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 mt-2">
           {filteredMenus.map((menu) => (
             <MenuCard
               key={menu.id}
@@ -230,80 +282,11 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
             />
           ))}
         </div>
-
-        {/* Tombol Show More Tengah */}
-        <div className="w-full flex justify-center mt-4">
-          <button className="px-6 py-2.5 rounded-full border border-gray-200 bg-white text-xs font-bold text-gray-500 hover:bg-gray-50 shadow-xs cursor-pointer">
-            Show More
-          </button>
-        </div>
       </main>
 
-      {/* ================= BLOK REVIEW (Gap 32px) ================= */}
-      <section className="max-w-[1200px] w-full mx-auto px-6 py-[32px] flex flex-col gap-6">
-        <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">
-          ★ {resto.averageRating || resto.star} (
-          {resto.totalReviews || resto.reviews?.length || 0} Ulasan)
-        </h2>
-
-        {/* Grid Review Card 2 Kolom (590px x 204px) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
-          {resto.reviews?.map((review) => (
-            <div
-              key={review.id}
-              className="w-full lg:w-[590px] h-auto min-h-[160px] bg-white border border-gray-100 p-6 rounded-[24px] shadow-xs flex flex-col gap-3"
-            >
-              {/* Atas: Avatar + Nama + Waktu */}
-              <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                  <Image
-                    src={review.user.avatar || "/images/avatar-placeholder.png"}
-                    alt="User Avatar"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-sm text-gray-900">
-                    {review.user.name}
-                  </span>
-                  <span className="text-[11px] font-bold text-gray-400">
-                    {new Date(review.createdAt).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-              </div>
-              {/* Bintang Rating */}
-              <div className="flex items-center gap-0.5 text-amber-500">
-                {[...Array(review.star)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    className="fill-[#FFAB0D] stroke-none"
-                  />
-                ))}
-              </div>
-              {/* Teks Komentar */}
-              <p className="text-xs font-medium text-gray-500 leading-relaxed line-clamp-3">
-                {review.comment ||
-                  "Penjual ramah, makanan hangat dan porsi pas luar biasa!"}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Tombol Show More Review */}
-        <div className="w-full flex justify-center mt-4">
-          <button className="px-6 py-2.5 rounded-full border border-gray-200 bg-white text-xs font-bold text-gray-500 hover:bg-gray-50 shadow-xs cursor-pointer">
-            Show More
-          </button>
-        </div>
-      </section>
-
-      <Footer />
+      <div className="bg-black mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 }

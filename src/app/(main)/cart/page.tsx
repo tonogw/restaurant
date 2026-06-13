@@ -5,8 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartService } from "@/services/cartService";
-import Navbar from "@/app/home/parts/navbar";
+import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+
 // import { Trash2, Plus, Minus } from "lucide-react";
 // import IconPlus from "/icons/icon-icon-plus.svg";
 // import IconMinus from "/icon/icon-minus.svg";
@@ -228,8 +229,9 @@ export default function CartPage() {
           </button>
         </div>
       </main>
-
-      <Footer />
+      <div className="bg-black">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -23,12 +23,13 @@ import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { navbarLinks } from "@/constant/navbar-data";
+// import { navbarLinks } from "@/constant/navbar-data";
 
 export default function Navbar({
   isLightPage = false,
 }: {
   isLightPage?: boolean;
+  carCount?: number;
 }) {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
@@ -103,7 +104,7 @@ export default function Navbar({
     enabled: !!token,
   });
 
-  const totalCartItems = cartResponse?.data?.summary?.total_items || 0;
+  const totalCartItems = cartResponse?.data?.summary?.totalItems || 0;
 
   return (
     <header

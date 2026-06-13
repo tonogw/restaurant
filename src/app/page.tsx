@@ -1,9 +1,9 @@
 "use client";
 // import RegisterPage from "./(auth)/register/page";
-import React, { useState, useEffect, FormEvent } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Footer from "@/components/shared/Footer";
-import Navbar from "./home/parts/navbar";
+import Navbar from "@/components/shared/Navbar";
 import HeroSection from "@/app/home/parts/HeroSection";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";

@@ -67,7 +67,7 @@ export interface Restaurant {
 
 export interface Menu {
   id: number;
-  food_name: string;
+  foodName: string;
   price: number;
   type: string;
   Enum: ["food", "drink"];
@@ -202,8 +202,6 @@ export interface RecommendationResponse {
   };
 }
 
-export interface MyOrder {}
-
 export interface RestoDetailResponse {
   success: boolean;
   message: string;
@@ -224,7 +222,7 @@ export interface RestoDetailResponse {
     total_reviews: number;
     menus: {
       id: number;
-      food_name: string;
+      foodName: string;
       price: number;
       type: string;
       image: string;
@@ -245,7 +243,7 @@ export interface RestoDetailResponse {
 
 export interface MenuItem {
   id: number;
-  food_name: string;
+  foodName: string;
   price: number;
   type: string; //"food" | "drink";
   image: string;
@@ -284,12 +282,6 @@ export interface RestaurantDetail {
   reviews: ReviewItem[];
 }
 
-export interface RestoDetailResponse {
-  success: boolean;
-  message: string;
-  data: RestaurantDetail;
-}
-
 export interface CartItemDetail {
   id: number;
   menu: MenuItem;
@@ -309,7 +301,7 @@ export interface CartGroup {
 }
 
 export interface CartSummary {
-  itemTotal: number;
+  totalItems: number;
   totalPrice: number;
   restaurant_count: number;
 }

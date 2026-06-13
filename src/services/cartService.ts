@@ -24,9 +24,9 @@ export const cartService = {
 
   // Ubah jumlah pesanan makanan (PUT /api/cart)
   updateQuantity: async (cartItemId: number, quantity: number) => {
-    const response = await api.put("/api/cart", {
-      id: cartItemId,
-      quantity: quantity,
+    const response = await api.put(`/api/cart/${cartItemId}`, {
+      // id: cartItemId,
+      quantity: Number(quantity),
     });
     return response.data;
   },
@@ -43,3 +43,8 @@ export const cartService = {
     return response.data;
   },
 };
+
+// debug!
+// if (typeof window !== "undefined") {
+//   (window as any).cartService = cartService;
+// }

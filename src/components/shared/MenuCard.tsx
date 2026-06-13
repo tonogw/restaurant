@@ -38,6 +38,7 @@ export default function MenuCard({
           </p>
         </div>
 
+        {/* Button actions */}
         <div className="md:flex justify-left shrink mt-2">
           {cartState ? (
             /* Mode 1: Quantity Mode jika barang sudah ada di keranjang server */
@@ -75,7 +76,7 @@ export default function MenuCard({
               </button>
             </div>
           ) : (
-            /* Mode 2: Tombol Add Merah Standar Figma */
+            // No sale button
             <button
               disabled={isAddPending}
               onClick={() => onAdd(menu.id)}

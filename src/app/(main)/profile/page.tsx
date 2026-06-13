@@ -12,7 +12,7 @@ import {
   type UpdateUserInput,
 } from "@/lib/validations/auth";
 import { AxiosError } from "axios";
-import Navbar from "@/app/home/parts/navbar";
+import Navbar from "@/components/shared/Navbar";
 import {
   Sheet,
   SheetContent,
