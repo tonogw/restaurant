@@ -11,7 +11,7 @@ import { AxiosError } from "axios";
 import Image from "next/image";
 import LBurger from "../../../../public/images/Image-landscape-burger.png";
 import AuthCard from "@/components/shared/AuthCard";
-// import Link from "next/link";
+import Link from "next/link";
 
 interface ApiErrorResponse {
   message?: string;
@@ -25,7 +25,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    // watch,
+    watch,
     formState: { errors },
   } = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
