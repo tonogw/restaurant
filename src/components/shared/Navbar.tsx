@@ -22,6 +22,8 @@ import { LoginInputs, loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { success } from "zod";
+import { Check, FileWarning } from "lucide-react";
 
 interface NavbarProps {
   isLightPage?: boolean;
@@ -35,7 +37,14 @@ export default function Navbar({
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [statusMessage, setStatusMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  // const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
@@ -43,16 +52,16 @@ export default function Navbar({
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
 
-  const logout = useAuthStore(
-    (state) =>
-      state.logout ||
-      (() => {
-        localStorage.removeItem("token");
-        useAuthStore.setState({ token: null });
-        router.push("/");
-        alert("Logged out successfully");
-      }),
-  );
+  // const logout = useAuthStore(
+  //   (state) =>
+  //     state.logout ||
+  //     (() => {
+  //       localStorage.removeItem("token");
+  //       useAuthStore.setState({ token: null });
+  //       router.push("/");
+  //       // alert("Logged out successfully");
+  //     }),
+  // );
 
   const isBlackText = scrolled || isLightPage;
 
@@ -71,12 +80,26 @@ export default function Navbar({
     onSuccess: (response) => {
       setToken(response.data.token);
       localStorage.setItem("token", response.data.token);
-      setErrorMessage(null);
+      // setErrorMessage(null);
+      setStatusMessage({
+        text: "Logged in successfull, welcome!",
+        type: "success",
+      });
       loginForm.reset();
-      alert("Login successful!");
+      // message
+      // alert("Login successful!");
+      setTimeout(() => {
+        setIsLoginOpen(false);
+        setStatusMessage(null);
+      }, 3000);
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      setErrorMessage(error.response?.data?.message || "Invalid credentials.");
+      // setErrorMessage(error.response?.data?.message || "Invalid credentials.");
+      setStatusMessage({
+        text: error.response?.data?.message || "Email or password is invalid",
+        type: "error",
+      });
+
       router.push("/login");
     },
   });
@@ -90,12 +113,28 @@ export default function Navbar({
     onSuccess: (response) => {
       setToken(response.data.token);
       localStorage.setItem("token", response.data.token);
-      setErrorMessage(null);
+      // setErrorMessage(null);
+      setStatusMessage({
+        text: "Congratulation! you're Foody account successfuly registered.",
+        type: "success",
+      });
       registerForm.reset();
-      alert("Registration successful!");
+
+      setTimeout(() => {
+        setIsRegisterOpen(false);
+        setStatusMessage(null);
+      }, 3000);
+      // alert("Registration successful!");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      setErrorMessage(error.response?.data?.message || "Registration failed.");
+      // setErrorMessage(error.response?.data?.message || "Registration failed.");
+      setStatusMessage({
+        text:
+          error.response?.data?.message ||
+          "Registration failed!. Email already exists.",
+        type: "error",
+      });
+      // Route to register page
       router.push("/register");
     },
   });
@@ -194,7 +233,7 @@ export default function Navbar({
                 {/* ✓ FIXED: Menambahkan side="top" agar animasi muncul meluncur dari atas monitor */}
                 <SheetContent
                   side="top"
-                  className="w-full bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg"
+                  className="w-full max-w-60 md:max-w-159.5 lg:max-w-180 bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg rounded-2xl"
                 >
                   <SheetTitle className="hidden">
                     User Profile Navigation
@@ -253,8 +292,14 @@ export default function Navbar({
                       onClick={() => {
                         localStorage.removeItem("token");
                         useAuthStore.setState({ token: null });
+                        setIsLoginOpen(false);
+                        setIsRegisterOpen(false);
                         router.push("/");
-                        alert("Logged out successfully");
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 100);
+
+                        // alert("Logged out successfully");
 
                         if (typeof setIsLoginOpen === "function")
                           setIsLoginOpen(false);
@@ -280,7 +325,13 @@ export default function Navbar({
             // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
               {/* SHEET LOGIN */}
-              <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+              <Sheet
+                open={isLoginOpen}
+                onOpenChange={(open) => {
+                  setIsLoginOpen(open);
+                  if (!open) setStatusMessage(null);
+                }}
+              >
                 <SheetTitle className="hidden">Login Panel</SheetTitle>
                 <SheetDescription className="hidden">
                   Enter credentials
@@ -302,9 +353,24 @@ export default function Navbar({
                     subtitle="Good to see you again! Let's eat"
                     activeTab="login"
                   >
-                    {errorMessage && (
-                      <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold">
-                        ⚠ {errorMessage}
+                    {statusMessage && (
+                      <div
+                        className={`
+                        
+                        mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold ${
+                          statusMessage.type === "success"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            : "bg-rose-50 border-rose-100 text-rose-600"
+                        }
+                        `}
+                      >
+                        ⚠{" "}
+                        {statusMessage.type === "success" ? (
+                          <Check size={16} />
+                        ) : (
+                          <FileWarning size={16} />
+                        )}
+                        {statusMessage.text}
                       </div>
                     )}
                     <form
@@ -352,6 +418,7 @@ export default function Navbar({
                         className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
                       >
                         Login
+                        {loginMutation.isPending ? "Loading..." : "Login"}
                       </button>
                     </form>
                   </AuthCard>
@@ -359,10 +426,16 @@ export default function Navbar({
               </Sheet>
 
               {/* SHEET REGISTER */}
-              <Sheet open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
-                <SheetTitle className="hidden">Register Panel</SheetTitle>
+              <Sheet
+                open={isRegisterOpen}
+                onOpenChange={(open) => {
+                  setIsRegisterOpen(open);
+                  if (!open) setStatusMessage(null);
+                }}
+              >
+                <SheetTitle className="hidden">Create account</SheetTitle>
                 <SheetDescription className="hidden">
-                  Create an account
+                  Sign Up to create an account
                 </SheetDescription>
                 <SheetTrigger asChild>
                   <Button
@@ -381,6 +454,25 @@ export default function Navbar({
                     subtitle="Glad you're here! Let's get started"
                     activeTab="register"
                   >
+                    {/* Status message */}
+                    {statusMessage && (
+                      <div
+                        className={`
+                        mb-4 p-3.5 rounded-xl text-xs font-bold border ${
+                          statusMessage.type === "success"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                            : "bg-rose-50 border-rose-100 text-rose-600"
+                        }
+                        `}
+                      >
+                        {statusMessage.type === "success" ? (
+                          <Check />
+                        ) : (
+                          <FileWarning />
+                        )}
+                        {statusMessage.text}
+                      </div>
+                    )}
                     <form
                       onSubmit={registerForm.handleSubmit((data) => {
                         const { confirmPassword: _, ...payload } = data;
@@ -437,7 +529,8 @@ export default function Navbar({
                             height={24}
                           />
                         </button>
-
+                      </div>
+                      <div className="relative w-full">
                         <input
                           id="nav-confirm-new-password"
                           type={showPassword ? "text" : "password"}
@@ -463,11 +556,15 @@ export default function Navbar({
                           />
                         </button>
                       </div>
+
                       <button
                         type="submit"
+                        disabled={registerMutation.isPending}
                         className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
                       >
-                        Sign Up
+                        {registerMutation.isPending
+                          ? "Registering..."
+                          : "Sign Up"}
                       </button>
                     </form>
                   </AuthCard>
