@@ -37,8 +37,12 @@ export default function Navbar({
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
+
   const logout = useAuthStore(
     (state) =>
       state.logout ||
@@ -251,6 +255,7 @@ export default function Navbar({
                         useAuthStore.setState({ token: null });
                         router.push("/");
                         alert("Logged out successfully");
+
                         if (typeof setIsLoginOpen === "function")
                           setIsLoginOpen(false);
                         if (typeof setIsRegisterOpen === "function")
@@ -275,7 +280,7 @@ export default function Navbar({
             // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
               {/* SHEET LOGIN */}
-              <Sheet>
+              <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
                 <SheetTitle className="hidden">Login Panel</SheetTitle>
                 <SheetDescription className="hidden">
                   Enter credentials
@@ -354,7 +359,7 @@ export default function Navbar({
               </Sheet>
 
               {/* SHEET REGISTER */}
-              <Sheet>
+              <Sheet open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
                 <SheetTitle className="hidden">Register Panel</SheetTitle>
                 <SheetDescription className="hidden">
                   Create an account
@@ -416,6 +421,23 @@ export default function Navbar({
                           {...registerForm.register("password")}
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                        >
+                          <Image
+                            src={
+                              showPassword
+                                ? "/icons/icon-eye.svg"
+                                : "/icons/icon-eye-off.svg"
+                            }
+                            alt="toggle visibility"
+                            width={24}
+                            height={24}
+                          />
+                        </button>
+
                         <input
                           id="nav-confirm-new-password"
                           type={showPassword ? "text" : "password"}
