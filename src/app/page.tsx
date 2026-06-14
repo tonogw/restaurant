@@ -2,7 +2,7 @@
 // import RegisterPage from "./(auth)/register/page";
 import React, { useState, Suspense } from "react";
 import Image from "next/image";
-import Footer from "@/components/shared/Footer";
+// import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 import HeroSection from "@/app/home/parts/HeroSection";
 import { useQuery } from "@tanstack/react-query";
@@ -154,7 +154,7 @@ function HomePageContent() {
 
       {/* FOOTER */}
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

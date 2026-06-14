@@ -215,7 +215,14 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
               </h2>
               <div className="flex items-center gap-1.5 text-xs md:text-sm font-bold text-gray-500">
                 <span className="flex items-center gap-0.5 text-[#0A0D12]">
-                  ★ {resto.averageRating || resto.star}
+                  <Image
+                    src="/icons/icon-star.svg"
+                    alt="star"
+                    width={24}
+                    height={24}
+                    unoptimized
+                  />
+                  {resto.averageRating || resto.star}
                 </span>
               </div>
               <span className="truncate">{resto.place} • 2.4 km</span>
@@ -223,8 +230,8 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
 
           {/* KOLOM 2: Icon Share Bulat (44x44), Rata Kanan Tengah / Middle */}
-          <div className="flex items-center justify-end">
-            <button className="w-11 h-11  rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
+          <div className="flex items-center   justify-end">
+            <button className="w-full px-4 md:px-7.75 gap-1 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
               <Image
                 src="/icons/icon-share.svg"
                 alt="share"
@@ -232,7 +239,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                 height={20}
                 className="object-contain "
               />
-              <span className="hidden md:flex px-7.75 ">Share</span>
+              <span className="hidden md:flex ">Share</span>
             </button>
           </div>
         </div>
@@ -286,9 +293,9 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         </div>
       </main>
 
-      <div className="bg-black mt-auto">
+      {/* <div className="bg-black mt-auto">
         <Footer />
-      </div>
+      </div> */}
     </div>
   );
 }

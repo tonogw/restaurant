@@ -46,6 +46,7 @@ export default function Navbar({
         localStorage.removeItem("token");
         useAuthStore.setState({ token: null });
         router.push("/");
+        alert("Logged out successfully");
       }),
   );
 
@@ -119,7 +120,7 @@ export default function Navbar({
     <header
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
-      <div className="custom-container h-16 md:h-20 flex items-center justify-between px-4 md:px-6">
+      <div className="custom-container h-16 md:h-20 flex items-center justify-between ">
         {/* SISI KIRI: LOGO */}
         <Link href="/" className="flex items-center gap-3 select-none">
           <Image
@@ -245,7 +246,16 @@ export default function Navbar({
                     </Link>
 
                     <button
-                      onClick={() => logout()}
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        useAuthStore.setState({ token: null });
+                        router.push("/");
+                        alert("Logged out successfully");
+                        if (typeof setIsLoginOpen === "function")
+                          setIsLoginOpen(false);
+                        if (typeof setIsRegisterOpen === "function")
+                          setIsRegisterOpen(false);
+                      }}
                       className="flex items-center gap-3 text-red-600 hover:text-red-700 font-bold text-xs py-1 w-full text-left cursor-pointer transition-colors"
                     >
                       <Image
@@ -354,7 +364,7 @@ export default function Navbar({
                     variant="outline"
                     className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${isBlackText ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
                   >
-                    Register
+                    Sign Up
                   </Button>
                 </SheetTrigger>
                 <SheetContent
@@ -406,6 +416,14 @@ export default function Navbar({
                           {...registerForm.register("password")}
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                         />
+                        <input
+                          id="nav-confirm-new-password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          autoComplete="confirm-new-password"
+                          {...registerForm.register("password")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
@@ -427,7 +445,7 @@ export default function Navbar({
                         type="submit"
                         className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
                       >
-                        Register
+                        Sign Up
                       </button>
                     </form>
                   </AuthCard>
