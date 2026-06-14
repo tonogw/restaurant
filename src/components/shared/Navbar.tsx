@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,7 @@ import { useForm } from "react-hook-form";
 import { LoginInputs, loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { success } from "zod";
-import { Check, FileWarning } from "lucide-react";
+import { Check, Menu } from "lucide-react";
 
 interface NavbarProps {
   isLightPage?: boolean;
@@ -35,6 +34,8 @@ export default function Navbar({
   cartCount,
 }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname(); // ✓ Hook dipanggil di paling atas, aman!
+
   const [scrolled, setScrolled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,24 +45,11 @@ export default function Navbar({
     type: "success" | "error";
   } | null>(null);
 
-  // const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
-
-  // const logout = useAuthStore(
-  //   (state) =>
-  //     state.logout ||
-  //     (() => {
-  //       localStorage.removeItem("token");
-  //       useAuthStore.setState({ token: null });
-  //       router.push("/");
-  //       // alert("Logged out successfully");
-  //     }),
-  // );
 
   const isBlackText = scrolled || isLightPage;
 
@@ -80,27 +68,22 @@ export default function Navbar({
     onSuccess: (response) => {
       setToken(response.data.token);
       localStorage.setItem("token", response.data.token);
-      // setErrorMessage(null);
       setStatusMessage({
-        text: "Logged in successfull, welcome!",
+        text: "Logged in successfully, welcome!",
         type: "success",
       });
       loginForm.reset();
-      // message
-      // alert("Login successful!");
       setTimeout(() => {
         setIsLoginOpen(false);
         setStatusMessage(null);
-      }, 3000);
+        window.location.href = "/";
+      }, 1500);
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      // setErrorMessage(error.response?.data?.message || "Invalid credentials.");
       setStatusMessage({
         text: error.response?.data?.message || "Email or password is invalid",
         type: "error",
       });
-
-      router.push("/login");
     },
   });
 
@@ -113,29 +96,24 @@ export default function Navbar({
     onSuccess: (response) => {
       setToken(response.data.token);
       localStorage.setItem("token", response.data.token);
-      // setErrorMessage(null);
       setStatusMessage({
-        text: "Congratulation! you're Foody account successfuly registered.",
+        text: "Congratulations! Your Foody account was successfully registered.",
         type: "success",
       });
       registerForm.reset();
-
       setTimeout(() => {
         setIsRegisterOpen(false);
         setStatusMessage(null);
-      }, 3000);
-      // alert("Registration successful!");
+        window.location.href = "/";
+      }, 1500);
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      // setErrorMessage(error.response?.data?.message || "Registration failed.");
       setStatusMessage({
         text:
           error.response?.data?.message ||
-          "Registration failed!. Email already exists.",
+          "Registration failed. Email already exists.",
         type: "error",
       });
-      // Route to register page
-      router.push("/register");
     },
   });
 
@@ -159,32 +137,38 @@ export default function Navbar({
       ? cartCount
       : cartResponse?.data?.summary?.totalItems || 0;
 
+  //
+  //  if (pathname === "/login" || pathname === "/register") {
+  //     return null;
+  //   }
+
   return (
     <header
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
-      <div className="custom-container h-16 md:h-20 flex items-center justify-between ">
-        {/* SISI KIRI: LOGO */}
+      <div className="custom-container h-16 md:h-20 flex items-center justify-between  ">
+        {/* ================= SISI KIRI: LOGO DINAMIS ================= */}
         <Link href="/" className="flex items-center gap-3 select-none">
           <Image
-            src="/images/logo.svg"
+            src={isBlackText ? "/images/logo.svg" : "/images/logo-white.svg"}
             alt="logo"
             width={42}
             height={42}
             unoptimized
           />
           <span
-            className={`text-2xl font-bold tracking-tight ${isBlackText ? "text-gray-900" : "text-white"}`}
+            className={`text-2xl font-bold tracking-tight hidden md:block ${isBlackText ? "text-gray-900" : "text-white"}`}
           >
             Foody
           </span>
         </Link>
 
-        {/* RIGHT BLOK */}
+        {/* ================= SISI KANAN: NAVIGATION AREA ================= */}
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            // ================= SCREEN: AFTER LOGIN =================
+            // ================= KONDISI 1: USER SUDAH LOGIN =================
             <div className="flex items-center gap-4 select-none">
+              {/* TAS KERANJANG */}
               <Link
                 href="/cart"
                 className="relative p-2 hover:opacity-80 transition-opacity"
@@ -208,11 +192,10 @@ export default function Navbar({
                 </span>
               </Link>
 
-              {/* ✓ FIXED: PROFILE SHEET SIDE TOP DIJADIKAN SATU KONTROL PEMICU */}
+              {/* AVATAR BUNDAR DAN SHEET PROFILE (SIDE TOP) */}
               <Sheet>
                 <SheetTrigger asChild>
                   <div className="flex items-center gap-2 group cursor-pointer select-none">
-                    {/* Waduh penahan avatar w-9 h-9 bundar dikunci agar tidak meluber keluar kontainer */}
                     <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500 flex-shrink-0">
                       <Image
                         src={endUser.avatar || "/images/avatar-placeholder.png"}
@@ -223,14 +206,12 @@ export default function Navbar({
                       />
                     </div>
                     <span
-                      className={`text-sm font-bold tracking-tight ${isBlackText ? "text-gray-800" : "text-white"}`}
+                      className={`text-sm font-bold tracking-tight hidden md:block ${isBlackText ? "text-gray-800" : "text-white"}`}
                     >
                       {endUser.name}
                     </span>
                   </div>
                 </SheetTrigger>
-
-                {/* ✓ FIXED: Menambahkan side="top" agar animasi muncul meluncur dari atas monitor */}
                 <SheetContent
                   side="top"
                   className="w-full max-w-60 md:max-w-159.5 lg:max-w-180 bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg rounded-2xl"
@@ -241,8 +222,6 @@ export default function Navbar({
                   <SheetDescription className="hidden">
                     Quick links for user configuration
                   </SheetDescription>
-
-                  {/* PANEL AKUN BANNER FIGMA JOHN DOE */}
                   <div className="w-full max-w-xs bg-white rounded-2xl border border-gray-100 p-4 shadow-xs flex flex-col gap-3">
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                       <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
@@ -259,52 +238,39 @@ export default function Navbar({
                         {endUser.name}
                       </span>
                     </div>
-
                     <Link
                       href="/address"
                       className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
                     >
                       <Image
                         src="/icons/icon-delivery-address.svg"
-                        alt="delivery-address"
+                        alt="address"
                         width={16}
                         height={16}
                         className="text-gray-400"
                       />{" "}
                       Delivery Address
                     </Link>
-
                     <Link
                       href="/orders"
                       className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
                     >
                       <Image
                         src="/icons/icon-bag-black.svg"
-                        alt="black-bag"
+                        alt="bag"
                         width={16}
                         height={16}
                         className="text-gray-400"
                       />{" "}
                       My Orders
                     </Link>
-
                     <button
                       onClick={() => {
                         localStorage.removeItem("token");
                         useAuthStore.setState({ token: null });
                         setIsLoginOpen(false);
                         setIsRegisterOpen(false);
-                        router.push("/");
-                        setTimeout(() => {
-                          window.location.reload();
-                        }, 100);
-
-                        // alert("Logged out successfully");
-
-                        if (typeof setIsLoginOpen === "function")
-                          setIsLoginOpen(false);
-                        if (typeof setIsRegisterOpen === "function")
-                          setIsRegisterOpen(false);
+                        window.location.href = "/";
                       }}
                       className="flex items-center gap-3 text-red-600 hover:text-red-700 font-bold text-xs py-1 w-full text-left cursor-pointer transition-colors"
                     >
@@ -322,254 +288,440 @@ export default function Navbar({
               </Sheet>
             </div>
           ) : (
-            // ================= SCREEN: BEFORE LOGIN =================
+            // ================= KONDISI 2: USER BELUM LOGIN =================
             <div className="flex items-center gap-4">
-              {/* SHEET LOGIN */}
-              <Sheet
-                open={isLoginOpen}
-                onOpenChange={(open) => {
-                  setIsLoginOpen(open);
-                  if (!open) setStatusMessage(null);
-                }}
-              >
-                <SheetTitle className="hidden">Login Panel</SheetTitle>
-                <SheetDescription className="hidden">
-                  Enter credentials
-                </SheetDescription>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={`font-bold text-sm rounded-xl border border-gray-400 px-14 py-2.25 cursor-pointer ${isBlackText ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"}`}
-                  >
-                    Sign In
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
+              {/* DESKTOP VIEW */}
+              <div className="hidden md:flex items-center gap-4">
+                {/* SHEET LOGIN DESKTOP */}
+                <Sheet
+                  open={isLoginOpen}
+                  onOpenChange={(open) => {
+                    setIsLoginOpen(open);
+                    if (!open) setStatusMessage(null);
+                  }}
                 >
-                  <AuthCard
-                    title="Welcome Back"
-                    subtitle="Good to see you again! Let's eat"
-                    activeTab="login"
-                  >
-                    {statusMessage && (
-                      <div
-                        className={`
-                        
-                        mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold ${
-                          statusMessage.type === "success"
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-rose-50 border-rose-100 text-rose-600"
-                        }
-                        `}
-                      >
-                        ⚠{" "}
-                        {statusMessage.type === "success" ? (
-                          <Check size={16} />
-                        ) : (
-                          <FileWarning size={16} />
-                        )}
-                        {statusMessage.text}
-                      </div>
-                    )}
-                    <form
-                      onSubmit={loginForm.handleSubmit((data) =>
-                        loginMutation.mutate(data),
-                      )}
-                      className="space-y-4 mt-2"
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={`font-bold text-sm rounded-xl border border-gray-400 px-14 py-2.25 cursor-pointer ${isBlackText ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10"}`}
                     >
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="Email"
-                        autoComplete="email"
-                        {...loginForm.register("email")}
-                        className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      <div className="relative w-full">
+                      Sign In
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
+                  >
+                    <AuthCard
+                      title="Welcome Back"
+                      subtitle="Good to see you again! Let's eat"
+                      activeTab="login"
+                    >
+                      {statusMessage && (
+                        <div
+                          className={`mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2 border ${statusMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-100 text-rose-600"}`}
+                        >
+                          <Check size={16} />
+                          {statusMessage.text}
+                        </div>
+                      )}
+                      <form
+                        onSubmit={loginForm.handleSubmit((data) =>
+                          loginMutation.mutate(data),
+                        )}
+                        className="space-y-4 mt-2"
+                      >
                         <input
-                          id="current-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Password"
-                          autoComplete="current-password"
-                          {...loginForm.register("password")}
+                          id="email"
+                          type="email"
+                          placeholder="Email"
+                          {...loginForm.register("email")}
                           className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                        >
-                          <Image
-                            src={
-                              showPassword
-                                ? "/icons/icon-eye-off.svg"
-                                : "/icons/icon-eye.svg"
-                            }
-                            alt="toggle show password"
-                            width={24}
-                            height={24}
+                        <div className="relative w-full">
+                          <input
+                            id="current-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            {...loginForm.register("password")}
+                            className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                          >
+                            <Image
+                              src={
+                                showPassword
+                                  ? "/icons/icon-eye-off.svg"
+                                  : "/icons/icon-eye.svg"
+                              }
+                              alt="eye"
+                              width={24}
+                              height={24}
+                            />
+                          </button>
+                        </div>
+                        <button
+                          type="submit"
+                          className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
+                        >
+                          Login
                         </button>
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
-                      >
-                        Login
-                        {loginMutation.isPending ? "Loading..." : "Login"}
-                      </button>
-                    </form>
-                  </AuthCard>
-                </SheetContent>
-              </Sheet>
+                      </form>
+                    </AuthCard>
+                  </SheetContent>
+                </Sheet>
 
-              {/* SHEET REGISTER */}
-              <Sheet
-                open={isRegisterOpen}
-                onOpenChange={(open) => {
-                  setIsRegisterOpen(open);
-                  if (!open) setStatusMessage(null);
-                }}
-              >
-                <SheetTitle className="hidden">Create account</SheetTitle>
-                <SheetDescription className="hidden">
-                  Sign Up to create an account
-                </SheetDescription>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${isBlackText ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
-                  >
-                    Sign Up
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
+                {/* SHEET REGISTER DESKTOP */}
+                <Sheet
+                  open={isRegisterOpen}
+                  onOpenChange={(open) => {
+                    setIsRegisterOpen(open);
+                    if (!open) setStatusMessage(null);
+                  }}
                 >
-                  <AuthCard
-                    title="Welcome to Foody"
-                    subtitle="Glad you're here! Let's get started"
-                    activeTab="register"
-                  >
-                    {/* Status message */}
-                    {statusMessage && (
-                      <div
-                        className={`
-                        mb-4 p-3.5 rounded-xl text-xs font-bold border ${
-                          statusMessage.type === "success"
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-rose-50 border-rose-100 text-rose-600"
-                        }
-                        `}
-                      >
-                        {statusMessage.type === "success" ? (
-                          <Check />
-                        ) : (
-                          <FileWarning />
-                        )}
-                        {statusMessage.text}
-                      </div>
-                    )}
-                    <form
-                      onSubmit={registerForm.handleSubmit((data) => {
-                        const { confirmPassword: _, ...payload } = data;
-                        registerMutation.mutate(payload);
-                      })}
-                      className="space-y-3 mt-2"
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`font-bold text-sm rounded-xl py-2.25 px-[52.5px] cursor-pointer ${isBlackText ? "bg-[#C12116] text-white hover:bg-[#961818]" : "bg-white text-black hover:bg-gray-100"}`}
                     >
-                      <input
-                        id="name"
-                        type="text"
-                        placeholder="Name"
-                        autoComplete="name"
-                        {...registerForm.register("name")}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="Email"
-                        autoComplete="email"
-                        {...registerForm.register("email")}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      <input
-                        id="phone"
-                        type="text"
-                        placeholder="Phone Number"
-                        autoComplete="tel"
-                        {...registerForm.register("phone")}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                      />
-                      <div className="relative w-full">
-                        <input
-                          id="nav-new-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Password"
-                          autoComplete="new-password"
-                          {...registerForm.register("password")}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
+                      Sign Up
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-full sm:max-w-md lg:max-w-180 bg-white p-8 flex items-center justify-center border-l border-gray-100"
+                  >
+                    <AuthCard
+                      title="Welcome to Foody"
+                      subtitle="Glad you're here! Let's get started"
+                      activeTab="register"
+                    >
+                      {statusMessage && (
+                        <div
+                          className={`mb-4 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${statusMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-100 text-rose-600"}`}
                         >
-                          <Image
-                            src={
-                              showPassword
-                                ? "/icons/icon-eye.svg"
-                                : "/icons/icon-eye-off.svg"
-                            }
-                            alt="toggle visibility"
-                            width={24}
-                            height={24}
-                          />
-                        </button>
-                      </div>
-                      <div className="relative w-full">
-                        <input
-                          id="nav-confirm-new-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Password"
-                          autoComplete="confirm-new-password"
-                          {...registerForm.register("password")}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                        >
-                          <Image
-                            src={
-                              showPassword
-                                ? "/icons/icon-eye.svg"
-                                : "/icons/icon-eye-off.svg"
-                            }
-                            alt="toggle visibility"
-                            width={24}
-                            height={24}
-                          />
-                        </button>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={registerMutation.isPending}
-                        className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
+                          <Check size={16} />
+                          {statusMessage.text}
+                        </div>
+                      )}
+                      <form
+                        onSubmit={registerForm.handleSubmit((data) => {
+                          const { confirmPassword: _, ...payload } = data;
+                          registerMutation.mutate(payload);
+                        })}
+                        className="space-y-3 mt-2"
                       >
-                        {registerMutation.isPending
-                          ? "Registering..."
-                          : "Sign Up"}
-                      </button>
-                    </form>
-                  </AuthCard>
-                </SheetContent>
-              </Sheet>
+                        <input
+                          id="name"
+                          type="text"
+                          placeholder="Name"
+                          {...registerForm.register("name")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        <input
+                          id="email"
+                          type="email"
+                          placeholder="Email"
+                          {...registerForm.register("email")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        <input
+                          id="phone"
+                          type="text"
+                          placeholder="Phone Number"
+                          {...registerForm.register("phone")}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                        />
+                        <div className="relative w-full">
+                          <input
+                            id="nav-new-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            {...registerForm.register("password")}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                          >
+                            <Image
+                              src={
+                                showPassword
+                                  ? "/icons/icon-eye-off.svg"
+                                  : "/icons/icon-eye.svg"
+                              }
+                              alt="eye"
+                              width={24}
+                              height={24}
+                            />
+                          </button>
+                        </div>
+                        <div className="relative w-full">
+                          <input
+                            id="nav-confirm-new-password"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm Password"
+                            {...registerForm.register("confirmPassword")}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                          >
+                            <Image
+                              src={
+                                showConfirmPassword
+                                  ? "/icons/icon-eye-off.svg"
+                                  : "/icons/icon-eye.svg"
+                              }
+                              alt="eye"
+                              width={24}
+                              height={24}
+                            />
+                          </button>
+                        </div>
+                        <button
+                          type="submit"
+                          className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
+                        >
+                          Sign Up
+                        </button>
+                      </form>
+                    </AuthCard>
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* MOBILE VIEW */}
+              <div className="md:hidden">
+                <Sheet
+                  open={isLoginOpen || isRegisterOpen}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setIsLoginOpen(false);
+                      setIsRegisterOpen(false);
+                      setStatusMessage(null);
+                    }
+                  }}
+                >
+                  <SheetTrigger asChild>
+                    <button
+                      onClick={() => setIsLoginOpen(true)}
+                      className={`p-2 cursor-pointer focus:outline-hidden ${isBlackText ? "text-gray-900" : "text-white"}`}
+                    >
+                      <Menu size={24} />
+                    </button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-full sm:max-w-md bg-white p-8 flex flex-col items-center justify-center border-l border-gray-100 overflow-y-auto"
+                  >
+                    <SheetTitle className="text-xl font-extrabold text-gray-900 mb-2">
+                      Foody Portal Access
+                    </SheetTitle>
+                    <SheetDescription className="text-gray-400 text-xs text-center mb-6">
+                      Please login or register to explore our best delicacies.
+                    </SheetDescription>
+
+                    {isLoginOpen ? (
+                      <AuthCard
+                        title="Welcome Back"
+                        subtitle="Good to see you again! Let's eat"
+                        activeTab="login"
+                      >
+                        {statusMessage && (
+                          <div
+                            className={`mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2 border ${statusMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-100 text-rose-600"}`}
+                          >
+                            <Check size={16} />
+                            {statusMessage.text}
+                          </div>
+                        )}
+                        <form
+                          onSubmit={loginForm.handleSubmit((data) =>
+                            loginMutation.mutate(data),
+                          )}
+                          className="space-y-4 w-full max-w-xs mx-auto"
+                        >
+                          <input
+                            id="email-mobile"
+                            type="email"
+                            placeholder="Email"
+                            {...loginForm.register("email")}
+                            className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <div className="relative w-full">
+                            <input
+                              id="password-mobile"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Password"
+                              {...loginForm.register("password")}
+                              className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                            >
+                              <Image
+                                src={
+                                  showPassword
+                                    ? "/icons/icon-eye-off.svg"
+                                    : "/icons/icon-eye.svg"
+                                }
+                                alt="toggle"
+                                width={24}
+                                height={24}
+                              />
+                            </button>
+                          </div>
+                          <button
+                            type="submit"
+                            className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
+                          >
+                            Login
+                          </button>
+                          <p className="text-xs text-center mt-4 text-gray-500">
+                            Don&apos;t have an account?{" "}
+                            <span
+                              onClick={() => {
+                                setIsLoginOpen(false);
+                                setIsRegisterOpen(true);
+                                setStatusMessage(null);
+                              }}
+                              className="text-[#C12116] font-bold cursor-pointer hover:underline"
+                            >
+                              Sign Up
+                            </span>
+                          </p>
+                        </form>
+                      </AuthCard>
+                    ) : (
+                      <AuthCard
+                        title="Welcome to Foody"
+                        subtitle="Glad you're here! Let's get started"
+                        activeTab="register"
+                      >
+                        {statusMessage && (
+                          <div
+                            className={`mb-4 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${statusMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-rose-50 border-rose-100 text-rose-600"}`}
+                          >
+                            <Check size={16} />
+                            {statusMessage.text}
+                          </div>
+                        )}
+                        <form
+                          onSubmit={registerForm.handleSubmit((data) => {
+                            const { confirmPassword: _, ...payload } = data;
+                            registerMutation.mutate(payload);
+                          })}
+                          className="space-y-3 w-full max-w-xs mx-auto"
+                        >
+                          <input
+                            id="name-mobile"
+                            type="text"
+                            placeholder="Name"
+                            {...registerForm.register("name")}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <input
+                            id="email-mobile"
+                            type="email"
+                            placeholder="Email"
+                            {...registerForm.register("email")}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <input
+                            id="phone-mobile"
+                            type="text"
+                            placeholder="Phone Number"
+                            {...registerForm.register("phone")}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                          />
+                          <div className="relative w-full">
+                            <input
+                              id="pass-mobile"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Password"
+                              {...registerForm.register("password")}
+                              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                            >
+                              <Image
+                                src={
+                                  showPassword
+                                    ? "/icons/icon-eye-off.svg"
+                                    : "/icons/icon-eye.svg"
+                                }
+                                alt="eye"
+                                width={24}
+                                height={24}
+                              />
+                            </button>
+                          </div>
+                          <div className="relative w-full">
+                            <input
+                              id="conf-pass-mobile"
+                              type={showConfirmPassword ? "text" : "password"}
+                              placeholder="Confirm Password"
+                              {...registerForm.register("confirmPassword")}
+                              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 p-1"
+                            >
+                              <Image
+                                src={
+                                  showConfirmPassword
+                                    ? "/icons/icon-eye-off.svg"
+                                    : "/icons/icon-eye.svg"
+                                }
+                                alt="eye"
+                                width={24}
+                                height={24}
+                              />
+                            </button>
+                          </div>
+                          <button
+                            type="submit"
+                            className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"
+                          >
+                            Sign Up
+                          </button>
+                          <p className="text-xs text-center mt-4 text-gray-500">
+                            Already have an account?{" "}
+                            <span
+                              onClick={() => {
+                                setIsRegisterOpen(false);
+                                setIsLoginOpen(true);
+                                setStatusMessage(null);
+                              }}
+                              className="text-[#C12116] font-bold cursor-pointer hover:underline"
+                            >
+                              Sign In
+                            </span>
+                          </p>
+                        </form>
+                      </AuthCard>
+                    )}
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           )}
         </div>

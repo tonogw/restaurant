@@ -8,14 +8,11 @@ import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
 import { authService } from "@/services/authService";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
-import type { AuthCardProps } from "@/types/user";
+
 import AuthCard from "@/components/shared/AuthCard";
 import Image from "next/image";
-import Link from "next/link";
+
 import LBurger from "../../../../public/images/Image-landscape-burger.png";
-import Logo from "../../../../public/images/logo.svg";
-import { error } from "console";
-import { Eye, EyeClosed } from "lucide-react";
 
 interface ApiErrorResponse {
   message?: string;
@@ -59,7 +56,7 @@ export default function RegisterPage() {
   const onSubmit = (data: RegisterUser) => {
     setErrorMessage(null);
     // clear confirm password prior sending to backend
-    const { confirmPassword: _confirmPassword, ...payload } = data;
+    const { confirmPassword: _, ...payload } = data;
     mutation.mutate(payload);
   };
 

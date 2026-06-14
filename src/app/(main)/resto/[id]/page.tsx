@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
+// import Footer from "@/components/shared/Footer";
 import MenuCard from "@/components/shared/MenuCard";
 // import { Star } from "lucide-react";
 import type { RestoDetailResponse } from "@/types/resto";
@@ -121,14 +121,14 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
       <Navbar isLightPage={true} cartCount={badgeCount} />
 
       {/* WRAPPER UTAMA RESPONSIF */}
-      <div className="max-w-300 w-full mx-auto mt-4 flex flex-col gap-6 md:gap-8  md:px-6">
+      <div className="max-w-300 w-full mx-auto mt-4 flex flex-col gap-6 md:gap-8  ">
         {/* ==================================================== */}
         {/* 1. AREA BANNER BARIS ATAS */}
         {/* ==================================================== */}
 
         {/* VIEW MOBILE (w-393): Hanya 1 gambar tampil 361x260, sisanya sembunyi & bisa di-scrollX */}
         <div className="block md:hidden w-full max-w-90.25 mx-auto">
-          <div className="w-full h-65 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
+          <div className="w-full h-65 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs scrollbar">
             <Image
               src={displayImages[activeBannerIdx]}
               alt="Mobile Banner Active"
@@ -155,7 +155,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         {/* VIEW DESKTOP: Mosaik Grid Mewah */}
         <div className="hidden md:flex w-full gap-5 h-117.5">
           {/* Foto Kiri Besar */}
-          <div className="w-162.75 h-117.5 relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
+          <div className="hidden lg:w-162.75 h-117.5 relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
             <Image
               src={displayImages[0]}
               alt="Main Desktop Banner"
@@ -166,7 +166,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
           {/* Kanan: Susunan Bertingkat */}
           <div className="flex-1 flex flex-col gap-5">
-            <div className="w-full h-70.5 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
+            <div className="hidden h-75.5 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
               <Image
                 src={displayImages[1]}
                 alt="Banner 2"
@@ -175,7 +175,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
               />
             </div>
             <div className="flex gap-5 h-37">
-              <div className="flex-1 relative rounded-[24px] overflow-hidden bg-gray-100 shadow-xs">
+              <div className="flex-1 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
                 <Image
                   src={displayImages[2]}
                   alt="Banner 3"
@@ -183,7 +183,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                   className="object-cover"
                 />
               </div>
-              <div className="flex-1 relative rounded-[24px] overflow-hidden bg-gray-100 shadow-xs">
+              <div className="flex-1 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
                 <Image
                   src={displayImages[3]}
                   alt="Banner 4"
@@ -201,7 +201,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         <div className="w-full max-w-90.25 md:max-w-none mx-auto flex items-center justify-between border-b border-gray-100 pb-6 md:pb-8 h-22.5">
           {/* KOLOM 1: Logo Resto (90x90 di Mobile) + Info Resto (148x90 di Mobile) */}
           <div className="flex items-center gap-3 md:gap-5 h-full">
-            <div className="relative w-22.5 h-22.5 md:w-20 md:h-20 rounded-full overflow-hidden border border-gray-100 bg-white shadow-xs shrink-0">
+            <div className="relative w-22.5 h-22.5 md:w-30 md:h-30  overflow-hidden border border-gray-100 bg-white shadow-xs shrink-0">
               <Image
                 src={resto.logo}
                 alt={resto.name}
