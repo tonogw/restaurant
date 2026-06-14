@@ -20,17 +20,18 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { LoginInputs, loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterUser } from "@/lib/validations/auth";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-// import { navbarLinks } from "@/constant/navbar-data";
+
+interface NavbarProps {
+  isLightPage?: boolean;
+  cartCount?: number;
+}
 
 export default function Navbar({
   isLightPage = false,
-}: {
-  isLightPage?: boolean;
-  carCount?: number;
-}) {
+  cartCount,
+}: NavbarProps) {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +39,15 @@ export default function Navbar({
 
   const token = useAuthStore((state) => state.token);
   const setToken = useAuthStore((state) => state.setToken);
-  // const logout = useAuthStore((state) => state.logout);
+  const logout = useAuthStore(
+    (state) =>
+      state.logout ||
+      (() => {
+        localStorage.removeItem("token");
+        useAuthStore.setState({ token: null });
+        router.push("/");
+      }),
+  );
 
   const isBlackText = scrolled || isLightPage;
 
@@ -52,7 +61,6 @@ export default function Navbar({
     resolver: zodResolver(loginSchema),
   });
 
-  // MUTATION PIPELINE API @tanstack query
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: (response) => {
@@ -64,7 +72,6 @@ export default function Navbar({
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       setErrorMessage(error.response?.data?.message || "Invalid credentials.");
-      // IF ERROR ROUTE TO /login
       router.push("/login");
     },
   });
@@ -88,7 +95,6 @@ export default function Navbar({
     },
   });
 
-  // @tanstack query auto callback profile data
   const { data: profileData, isSuccess } = useQuery({
     queryKey: ["user-profile", token],
     queryFn: () => authService.profile(),
@@ -104,13 +110,16 @@ export default function Navbar({
     enabled: !!token,
   });
 
-  const totalCartItems = cartResponse?.data?.summary?.totalItems || 0;
+  const totalCartItems =
+    cartCount !== undefined
+      ? cartCount
+      : cartResponse?.data?.summary?.totalItems || 0;
 
   return (
     <header
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
-      <div className="custom-container h-16 md:h-20 flex items-center justify-between">
+      <div className="custom-container h-16 md:h-20 flex items-center justify-between px-4 md:px-6">
         {/* SISI KIRI: LOGO */}
         <Link href="/" className="flex items-center gap-3 select-none">
           <Image
@@ -143,45 +152,119 @@ export default function Navbar({
                   height="24"
                   className={isBlackText ? "hidden" : "block"}
                 />
-
-                {totalCartItems > 0 && (
-                  <Image
-                    src="/icons/icon-bag-black.svg"
-                    alt="Black bag"
-                    width={32}
-                    height={32}
-                    className={isBlackText ? "block" : "hidden"}
-                  />
-                )}
-                <span className="absolute -top-1 -right-1 bg-[#C12116] text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-scale-in">
+                <Image
+                  src="/icons/icon-bag-black.svg"
+                  alt="Black bag"
+                  width={32}
+                  height={32}
+                  className={isBlackText ? "block" : "hidden"}
+                />
+                <span className="absolute -top-1 -right-1 bg-[#C12116] text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
                   {totalCartItems}
                 </span>
               </Link>
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 group cursor-pointer"
-              >
-                {/* ROUTE TO PROFILE PAGE */}
-                <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500">
-                  <Image
-                    src={endUser.avatar || "/images/avatar-placeholder.png"}
-                    alt={endUser.name}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                </div>
-                <span
-                  className={`text-sm font-bold tracking-tight ${isBlackText ? "text-gray-800" : "text-white"}`}
+
+              {/* ✓ FIXED: PROFILE SHEET SIDE TOP DIJADIKAN SATU KONTROL PEMICU */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <div className="flex items-center gap-2 group cursor-pointer select-none">
+                    {/* Waduh penahan avatar w-9 h-9 bundar dikunci agar tidak meluber keluar kontainer */}
+                    <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500 flex-shrink-0">
+                      <Image
+                        src={endUser.avatar || "/images/avatar-placeholder.png"}
+                        alt={endUser.name}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                    <span
+                      className={`text-sm font-bold tracking-tight ${isBlackText ? "text-gray-800" : "text-white"}`}
+                    >
+                      {endUser.name}
+                    </span>
+                  </div>
+                </SheetTrigger>
+
+                {/* ✓ FIXED: Menambahkan side="top" agar animasi muncul meluncur dari atas monitor */}
+                <SheetContent
+                  side="top"
+                  className="w-full bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg"
                 >
-                  {endUser.name}
-                </span>
-              </Link>
+                  <SheetTitle className="hidden">
+                    User Profile Navigation
+                  </SheetTitle>
+                  <SheetDescription className="hidden">
+                    Quick links for user configuration
+                  </SheetDescription>
+
+                  {/* PANEL AKUN BANNER FIGMA JOHN DOE */}
+                  <div className="w-full max-w-xs bg-white rounded-2xl border border-gray-100 p-4 shadow-xs flex flex-col gap-3">
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                        <Image
+                          src={
+                            endUser.avatar || "/images/avatar-placeholder.png"
+                          }
+                          alt={endUser.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <span className="font-extrabold text-gray-900 text-sm">
+                        {endUser.name}
+                      </span>
+                    </div>
+
+                    <Link
+                      href="/address"
+                      className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
+                    >
+                      <Image
+                        src="/icons/icon-delivery-address.svg"
+                        alt="delivery-address"
+                        width={16}
+                        height={16}
+                        className="text-gray-400"
+                      />{" "}
+                      Delivery Address
+                    </Link>
+
+                    <Link
+                      href="/orders"
+                      className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
+                    >
+                      <Image
+                        src="/icons/icon-bag-black.svg"
+                        alt="black-bag"
+                        width={16}
+                        height={16}
+                        className="text-gray-400"
+                      />{" "}
+                      My Orders
+                    </Link>
+
+                    <button
+                      onClick={() => logout()}
+                      className="flex items-center gap-3 text-red-600 hover:text-red-700 font-bold text-xs py-1 w-full text-left cursor-pointer transition-colors"
+                    >
+                      <Image
+                        src="/icons/icon-logout.svg"
+                        alt="logout"
+                        width={16}
+                        height={16}
+                        className="text-red-400"
+                      />{" "}
+                      Logout
+                    </button>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           ) : (
             // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
-              {/* ===  SHEET LOGIN === */}
+              {/* SHEET LOGIN */}
               <Sheet>
                 <SheetTitle className="hidden">Login Panel</SheetTitle>
                 <SheetDescription className="hidden">
@@ -232,30 +315,23 @@ export default function Navbar({
                           {...loginForm.register("password")}
                           className="w-full px-4 py-3.5 rounded-xl border border-gray-200 text-black text-sm"
                         />
-                        {/* TOGGLE SHOW PASSWORD */}
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
                         >
-                          {showPassword ? (
-                            <Image
-                              src="/icons/icon-eye-off.svg"
-                              alt="icon sebuah mata menutup"
-                              width={24}
-                              height={24}
-                            />
-                          ) : (
-                            <Image
-                              src="/icons/icon-eye.svg"
-                              alt="icon sebuat mata"
-                              width={24}
-                              height={24}
-                            />
-                          )}
+                          <Image
+                            src={
+                              showPassword
+                                ? "/icons/icon-eye-off.svg"
+                                : "/icons/icon-eye.svg"
+                            }
+                            alt="toggle show password"
+                            width={24}
+                            height={24}
+                          />
                         </button>
                       </div>
-
                       <button
                         type="submit"
                         className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full"
@@ -267,7 +343,7 @@ export default function Navbar({
                 </SheetContent>
               </Sheet>
 
-              {/* === SHEET REGISTER === */}
+              {/* SHEET REGISTER */}
               <Sheet>
                 <SheetTitle className="hidden">Register Panel</SheetTitle>
                 <SheetDescription className="hidden">
@@ -330,7 +406,6 @@ export default function Navbar({
                           {...registerForm.register("password")}
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
                         />
-                        {/* TOGGLE SHOW PASSWORD */}
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
@@ -342,40 +417,12 @@ export default function Navbar({
                                 ? "/icons/icon-eye.svg"
                                 : "/icons/icon-eye-off.svg"
                             }
-                            alt="toggle password visibility"
+                            alt="toggle visibility"
                             width={24}
                             height={24}
                           />
                         </button>
                       </div>
-                      <div className="relative w-full ">
-                        <input
-                          id="nav-confirm-new-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Confirm Password"
-                          autoComplete="new-password"
-                          {...registerForm.register("confirmPassword")}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-black text-sm"
-                        />
-                        {/* TOGGLE SHOW PASSWORD */}
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer p-1"
-                        >
-                          <Image
-                            src={
-                              showPassword
-                                ? "/icons/icon-eye.svg"
-                                : "/icons/icon-eye-off.svg"
-                            }
-                            alt="toggle password visibility"
-                            width={24}
-                            height={24}
-                          />
-                        </button>
-                      </div>
-
                       <button
                         type="submit"
                         className="w-full bg-[#C12116] text-white font-bold py-3 rounded-full mt-2"

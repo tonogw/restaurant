@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { restoService } from "@/services/restoService";
-import { DetailResponse } from "@/types/resto";
+import type { RestoResponse } from "@/types/resto";
 
 // Hook to fetch resto id
-export const useRestoList = () => {
-  return useQuery<DetailResponse>({
+export const useResto = () => {
+  return useQuery<RestoResponse>({
     queryKey: ["get/api/resto"],
     queryFn: () => restoService.getRestaurants(),
   });

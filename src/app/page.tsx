@@ -1,6 +1,6 @@
 "use client";
 // import RegisterPage from "./(auth)/register/page";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
@@ -12,7 +12,7 @@ import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import { categoryData } from "@/constant/category-data";
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -156,5 +156,19 @@ export default function HomePage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-20 text-center font-bold font-nunito animate-pulse text-gray-400">
+          Loading Home...
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 }

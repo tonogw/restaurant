@@ -14,14 +14,14 @@ export default function MenuCard({
 }: MenuCardProps) {
   return (
     // Menu container
-    <div className="w-43 h-76.5 md:w-71.25 md:h-94.75 bg-white rounded-[16px] border border-gray-100 shadow-xs overflow-hidden flex flex-col group hover:shadow-md transition-all">
+    <div className="custom-container w-full h-76.5  md:h-94.75 bg-white rounded-[16px] border border-gray-100 shadow-xs overflow-hidden flex flex-col group hover:shadow-md transition-all">
       {/* Foto Menu Kotak Presisi (285px x 285px) */}
-      <div className="w-43 h-43  md:w-71.25 md:h-71.25 relative bg-gray-50 overflow-hidden shrink">
+      <div className="w-full h-43   md:h-71.25 relative bg-gray-50 overflow-hidden shrink">
         <Image
           src={menu.image}
           alt={menu.foodName}
           fill
-          sizes="(max-width: 768px) 172px, 285px"
+          sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>

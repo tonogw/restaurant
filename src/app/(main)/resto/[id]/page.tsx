@@ -8,9 +8,9 @@ import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import MenuCard from "@/components/shared/MenuCard";
-import { Star } from "lucide-react";
+// import { Star } from "lucide-react";
 import type { RestoDetailResponse } from "@/types/resto";
-import { Menu } from "@/constant/menu-data";
+// import { Menu } from "@/constant/menu-data";
 
 interface RestoDetailPageProps {
   params: Promise<{ id: string }>;
@@ -21,7 +21,9 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const { id } = React.use(params);
 
   // State Filter Kategori Menu
-  const [activeMenuTab, setActiveMenuTab] = useState<Menu>("All");
+  const [activeMenuTab, setActiveMenuTab] = useState<"All" | "Food" | "Drink">(
+    "All",
+  );
 
   // State Sederhana untuk mengontrol display gambar aktif di Mobile (0, 1, 2, atau 3)
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
@@ -115,7 +117,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const badgeCount = cartResponse?.data?.summary?.totalItems || 0;
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-16 md:pt-24 flex flex-col">
+    <div className="custom-container min-h-screen bg-[#F9FAFB] font-nunito pt-16 md:pt-24 flex flex-col">
       <Navbar isLightPage={true} cartCount={badgeCount} />
 
       {/* WRAPPER UTAMA RESPONSIF */}
@@ -215,22 +217,22 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                 <span className="flex items-center gap-0.5 text-[#0A0D12]">
                   ★ {resto.averageRating || resto.star}
                 </span>
-                <span>•</span>
-                <span className="truncate">{resto.place} • 2.4 km</span>
               </div>
+              <span className="truncate">{resto.place} • 2.4 km</span>
             </div>
           </div>
 
           {/* KOLOM 2: Icon Share Bulat (44x44), Rata Kanan Tengah / Middle */}
           <div className="flex items-center justify-end">
-            <button className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
+            <button className="w-11 h-11  rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
               <Image
                 src="/icons/icon-share.svg"
                 alt="share"
                 width={20}
                 height={20}
-                className="object-contain"
+                className="object-contain "
               />
+              <span className="hidden md:flex px-7.75 ">Share</span>
             </button>
           </div>
         </div>
@@ -239,7 +241,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
       {/* ==================================================== */}
       {/* 3. BLOK GRID MENU (Mobile: grid-cols-2 dengan gap-4) */}
       {/* ==================================================== */}
-      <main className="max-w-300 w-full mx-auto   py-8 flex flex-col gap-6">
+      <main className="custom-container max-w-300 w-full mx-auto   py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight">
             Menu
@@ -265,7 +267,7 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         </div>
 
         {/* GRID CONTAINER MENUCARD: Mobile 2 Kolom menyamping, Desktop tetap 4 Kolom */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 mt-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mt-2">
           {filteredMenus.map((menu) => (
             <MenuCard
               key={menu.id}

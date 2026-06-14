@@ -207,6 +207,16 @@
   @apply flex items-center justify-start;
 }
 
+@layer utilities {
+  .custom-container {
+    margin: 0 auto;
+    width: 100%;
+    /* custom width */
+    max-width: 361px;
+    @apply md:max-w-159.5 lg:max-w-300;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

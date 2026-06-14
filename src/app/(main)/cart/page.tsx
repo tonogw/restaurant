@@ -114,7 +114,7 @@ export default function CartPage() {
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                         <Image
                           src={item.menu.image}
-                          alt={item.menu.food_name}
+                          alt={item.menu.foodName}
                           fill
                           className="object-cover"
                         />
@@ -123,7 +123,7 @@ export default function CartPage() {
                       {/* Menu Name */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-gray-900 text-sm truncate">
-                          {item.menu.food_name}
+                          {item.menu.foodName}
                         </h3>
                         <p className="text-xs font-extrabold text-gray-400 mt-1">
                           Rp {item.menu.price.toLocaleString("id-ID")}
@@ -209,7 +209,7 @@ export default function CartPage() {
           <div className="flex justify-between text-sm font-semibold text-gray-500">
             <span>Total Items</span>
             <span className="text-gray-900 font-bold">
-              {summary?.itemTotal || 0} items
+              {summary?.totalItems || 0} items
             </span>
           </div>
 

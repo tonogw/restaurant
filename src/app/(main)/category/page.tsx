@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
@@ -10,12 +10,12 @@ import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import { Star } from "lucide-react";
 
-export default function CategoryPage() {
+// import { authService } from "@/services/authService";
+// import { cartService } from "@/services/cartService";
+
+function CategoryPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  import { authService } from "@/services/authService";
-  import { cartService } from "@/services/cartService";
 
   const currentSearch = searchParams.get("search") || "";
   const currentCategory = searchParams.get("category") || "All Restaurant";
@@ -55,7 +55,7 @@ export default function CategoryPage() {
       <Navbar isLightPage={true} />
 
       {/* CONTAINER UTAMA: Lebar maksimal dikunci 1200px agar simetris tengah monitor */}
-      <div className="max-w-[1200px] mx-auto px-6 mt-6 flex flex-col gap-6">
+      <div className="max-w-300 mx-auto px-6 mt-6 flex flex-col gap-6">
         {/* HEADER JUDUL: Berdiri mandiri tepat di pojok kiri bawah garis lurus wilayah Logo */}
         <div className="flex flex-col gap-1 w-full text-left">
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -215,5 +215,20 @@ export default function CategoryPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function CategoryPage() {
+  return (
+    // Membungkus komponen konten dengan Suspense agar lolos uji prerendering Next.js
+    <Suspense
+      fallback={
+        <div className="p-20 text-center font-bold font-nunito animate-pulse text-gray-400">
+          Loading Category...
+        </div>
+      }
+    >
+      <CategoryPageContent />
+    </Suspense>
   );
 }
