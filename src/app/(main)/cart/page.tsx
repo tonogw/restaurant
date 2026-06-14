@@ -185,10 +185,11 @@ export default function CartPage() {
                       >
                         {/* <Trash2 size={16} /> */}
                         <Image
-                          src="/icons/icon-trash.svg"
+                          src="/icons/icon-trash-white.svg"
                           alt="trash"
                           width={14}
                           height={14}
+                          className="bg-gray-400"
                         />
                       </button>
                     </div>
