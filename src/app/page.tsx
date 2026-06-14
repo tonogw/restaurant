@@ -50,7 +50,7 @@ function HomePageContent() {
      font-nunito"
     >
       {/* NAVBAR */}
-      <Navbar />
+      {/* <Navbar /> */}
 
       {/* HERO COMPONENT */}
       <HeroSection

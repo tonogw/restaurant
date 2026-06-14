@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+// import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,10 +13,10 @@ import Footer from "@/components/shared/Footer";
 // import IconMinus from "/icon/icon-minus.svg";
 
 import type {
-  MenuItem,
+  // MenuItem,
   CartItemDetail,
   CartGroup,
-  CartSummary,
+  // CartSummary,
   CartResponse,
 } from "@/types/resto";
 
