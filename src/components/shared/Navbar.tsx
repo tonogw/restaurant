@@ -127,13 +127,14 @@ export default function Navbar({
               <Sheet>
                 <SheetTrigger asChild>
                   <div className="flex items-center gap-2 group cursor-pointer select-none">
+                    {/* ✓ SOLUSI FOTO TERPOTONG: object-center object-cover memastikan muka bini simetris di tengah */}
                     <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700 border-2 border-amber-500 flex-shrink-0">
                       <Image
                         src={endUser.avatar || "/images/avatar-placeholder.png"}
                         alt={endUser.name}
                         fill
                         unoptimized
-                        className="object-cover"
+                        className="object-cover object-center"
                       />
                     </div>
                     <span
@@ -143,9 +144,11 @@ export default function Navbar({
                     </span>
                   </div>
                 </SheetTrigger>
+
+                {/* ✓ MATCH DESIGN DROPDOWN: Muncul tepat di bawah avatar sebelah kanan sesuai visual Menu (1).png */}
                 <SheetContent
                   side="top"
-                  className="w-full bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg rounded-2xl"
+                  className="absolute top-16 md:top-20 right-4 md:right-6 left-auto w-72 bg-white border border-gray-100 p-4 shadow-xl rounded-2xl flex flex-col gap-3 z-50 transform translate-x-0"
                 >
                   <SheetTitle className="hidden">
                     User Profile Navigation
@@ -153,51 +156,62 @@ export default function Navbar({
                   <SheetDescription className="hidden">
                     Quick links
                   </SheetDescription>
-                  <div className="w-full max-w-xs bg-white rounded-2xl border border-gray-100 p-4 shadow-xs flex flex-col gap-3">
-                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                        <Image
-                          src={
-                            endUser.avatar || "/images/avatar-placeholder.png"
-                          }
-                          alt={endUser.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <span className="font-extrabold text-gray-900 text-sm">
-                        {endUser.name}
-                      </span>
+
+                  <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                      <Image
+                        src={endUser.avatar || "/images/avatar-placeholder.png"}
+                        alt={endUser.name}
+                        fill
+                        unoptimized
+                        className="object-cover object-center"
+                      />
                     </div>
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
-                    >
-                      <Image
-                        src="/icons/icon-delivery-address.svg"
-                        alt="address"
-                        width={16}
-                        height={16}
-                      />
-                      Profile / Delivery Address
-                    </Link>
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem("token");
-                        useAuthStore.setState({ token: null });
-                        window.location.href = "/";
-                      }}
-                      className="flex items-center gap-3 text-red-600 hover:text-red-700 font-bold text-xs py-1 w-full text-left cursor-pointer transition-colors"
-                    >
-                      <Image
-                        src="/icons/icon-logout.svg"
-                        alt="logout"
-                        width={16}
-                        height={16}
-                      />
-                      Logout
-                    </button>
+                    <span className="font-extrabold text-gray-900 text-sm truncate">
+                      {endUser.name}
+                    </span>
                   </div>
+
+                  {/* NAVIGASI 1: DETAIL PROFIL */}
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 text-gray-600 hover:text-[#C12116] font-bold text-xs py-2 px-1 rounded-xl hover:bg-gray-50/50 transition-all"
+                  >
+                    <Image
+                      src="/icons/icon-delivery-address.svg"
+                      alt="address"
+                      width={16}
+                      height={16}
+                    />
+                    Profile / Delivery Address
+                  </Link>
+
+                  {/* ✓ TARGET UTAMA NAVIGASI JEMBATAN USER: Menyambungkan Link ke halaman My Orders */}
+                  <Link
+                    href="/orders"
+                    className="flex items-center gap-3 text-gray-600 hover:text-[#C12116] font-bold text-xs py-2 px-1 rounded-xl hover:bg-gray-50/50 transition-all"
+                  >
+                    <span className="text-sm">📄</span>
+                    My Orders / Transactions
+                  </Link>
+
+                  {/* NAVIGASI 3: LOGOUT AKSES */}
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      useAuthStore.setState({ token: null });
+                      window.location.href = "/";
+                    }}
+                    className="flex items-center gap-3 text-red-600 hover:text-red-700 hover:bg-red-50/50 font-bold text-xs py-2 px-1 rounded-xl w-full text-left cursor-pointer transition-all"
+                  >
+                    <Image
+                      src="/icons/icon-logout.svg"
+                      alt="logout"
+                      width={16}
+                      height={16}
+                    />
+                    Logout Account
+                  </button>
                 </SheetContent>
               </Sheet>
             </div>
