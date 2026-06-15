@@ -1,30 +1,18 @@
 "use client";
 
-// import React from "react";
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
-
-// import { Trash2, Plus, Minus } from "lucide-react";
-// import IconPlus from "/icons/icon-icon-plus.svg";
-// import IconMinus from "/icon/icon-minus.svg";
-
-import type {
-  // MenuItem,
-  CartItemDetail,
-  CartGroup,
-  // CartSummary,
-  CartResponse,
-} from "@/types/resto";
+import type { CartItemDetail, CartGroup, CartResponse } from "@/types/resto";
 
 export default function CartPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  // 1. FETCH DATA KERANJANG REAL-TIME DARI SERVER RAILWAY
   const { data: cartResponse, isLoading } = useQuery<CartResponse>({
     queryKey: ["user-cart"],
     queryFn: cartService.getCart,
@@ -33,7 +21,6 @@ export default function CartPage() {
   const cartGroups = cartResponse?.data?.cart || [];
   const summary = cartResponse?.data?.summary;
 
-  // 2. MUTASI PIPELINE UBAH JUMLAH PORSI (PUT /api/cart)
   const updateQtyMutation = useMutation({
     mutationFn: ({ id, quantity }: { id: number; quantity: number }) =>
       cartService.updateQuantity(id, quantity),
@@ -42,7 +29,6 @@ export default function CartPage() {
     },
   });
 
-  // 3. MUTASI PIPELINE HAPUS SATU MAKANAN (DELETE /api/cart/{id})
   const deleteItemMutation = useMutation({
     mutationFn: (id: number) => cartService.deleteItem(id),
     onSuccess: () => {
@@ -63,7 +49,6 @@ export default function CartPage() {
       <Navbar isLightPage={true} />
 
       <main className="max-w-300 w-full mx-auto px-6 py-12 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-        {/* SISI KIRI: DAFTAR MAKANAN DI KERANJANG (2 KOLOM) */}
         <div className="lg:col-span-2 space-y-6">
           <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
             Shopping Cart
@@ -83,13 +68,11 @@ export default function CartPage() {
               </button>
             </div>
           ) : (
-            // Loop Kelompok Restoran sesuai skema Swagger Grouping
             cartGroups.map((group: CartGroup) => (
               <div
                 key={group.restaurant.id}
                 className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-4"
               >
-                {/* Header Sub-Restoran */}
                 <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-50">
                     <Image
@@ -104,7 +87,6 @@ export default function CartPage() {
                   </h2>
                 </div>
 
-                {/* List Makanan di dalam Restoran ini */}
                 <div className="divide-y divide-gray-50">
                   {group.items.map((item: CartItemDetail) => (
                     <div
@@ -120,7 +102,6 @@ export default function CartPage() {
                         />
                       </div>
 
-                      {/* Menu Name */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-gray-900 text-sm truncate">
                           {item.menu.foodName}
@@ -130,7 +111,6 @@ export default function CartPage() {
                         </p>
                       </div>
 
-                      {/* Tombol Pengatur Jumlah Kuantitas Porsi */}
                       <div className="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 flex-shrink-0">
                         <button
                           disabled={
@@ -142,14 +122,13 @@ export default function CartPage() {
                               quantity: item.quantity - 1,
                             })
                           }
-                          className="text-gray-500 hover:text-gray-900 disabled:opacity-30 cursor-pointer"
+                          className="cursor-pointer hover:opacity-80 disabled:opacity-30"
                         >
-                          {/* <Minus size={14} /> */}
                           <Image
                             src="/icons/icon-minus.svg"
                             alt="minus"
-                            width={14}
-                            height={14}
+                            width={16}
+                            height={16}
                           />
                         </button>
                         <span className="text-xs font-bold text-gray-900 w-4 text-center">
@@ -163,33 +142,29 @@ export default function CartPage() {
                               quantity: item.quantity + 1,
                             })
                           }
-                          className="text-gray-500 hover:text-gray-900 cursor-pointer"
+                          className="cursor-pointer hover:opacity-80"
                         >
-                          {/* <Plus size={14} /> */}
                           <Image
                             src="/icons/icon-plus.svg"
                             alt="plus"
-                            width={14}
-                            height={14}
+                            width={16}
+                            height={16}
                           />
                         </button>
                       </div>
 
-                      {/* Tombol Aksi Hapus Item */}
                       <button
                         onClick={() => {
                           if (confirm("Remove item?"))
                             deleteItemMutation.mutate(item.id);
                         }}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors cursor-pointer flex-shrink-0"
+                        className="p-2 cursor-pointer hover:opacity-70 flex-shrink-0"
                       >
-                        {/* <Trash2 size={16} /> */}
                         <Image
-                          src="/icons/icon-trash-white.svg"
+                          src="/icons/icon-delete-address.svg"
                           alt="trash"
-                          width={14}
-                          height={14}
-                          className="bg-gray-400"
+                          width={20}
+                          height={20}
                         />
                       </button>
                     </div>
@@ -200,7 +175,6 @@ export default function CartPage() {
           )}
         </div>
 
-        {/* SISI KANAN: RINGKASAN PEMBAYARAN & BUTTON CHECKOUT (1 KOLOM) */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs flex flex-col gap-4">
           <h2 className="font-extrabold text-gray-900 text-lg">
             Order Summary
@@ -214,16 +188,16 @@ export default function CartPage() {
             </span>
           </div>
 
-          <div className="flex justify-between items-center text-sm font-semibold text-gray-500 border-t border-gray-50 pt-3 mt-1">
+          <div className="flex justify-between items-center text-sm font-semibold text-gray-500 border-t border-gray-100 pt-3 mt-1">
             <span>Total Price</span>
             <span className="text-xl font-extrabold text-[#C12116]">
-              Rp {summary?.totalPrice || 0}
+              Rp {(summary?.totalPrice || 0).toLocaleString("id-ID")}
             </span>
           </div>
 
           <button
             disabled={cartGroups.length === 0}
-            onClick={() => router.push("/checkout")} // ✓ Alur otomatis mengalir masuk ke halaman Checkout besok pagi
+            onClick={() => router.push("/checkout")}
             className="w-full bg-[#C12116] hover:bg-[#961818] text-white font-bold py-3.5 rounded-full text-center text-sm transition-colors mt-4 shadow-sm cursor-pointer disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
           >
             Proceed to Checkout

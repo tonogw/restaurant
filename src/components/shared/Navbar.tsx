@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +16,7 @@ import { authService } from "@/services/authService";
 import { cartService } from "@/services/cartService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
   isLightPage?: boolean;
@@ -34,6 +34,16 @@ export default function Navbar({
   const setToken = useAuthStore((state) => state.setToken);
 
   const isBlackText = scrolled || isLightPage;
+
+  // =========================================================================
+  // ✓ SINKRONISASI MUTLAK: Amankan Token dari LocalStorage agar State tidak Null
+  // =========================================================================
+  useEffect(() => {
+    const localToken = localStorage.getItem("token");
+    if (localToken && !token) {
+      setToken(localToken);
+    }
+  }, [token, setToken]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -61,9 +71,6 @@ export default function Navbar({
       ? cartCount
       : cartResponse?.data?.summary?.totalItems || 0;
 
-  // =========================================================================
-  // ✓ PROTEKSI PATH: JIKA BERADA DI HALAMAN AUTH, NAVBAR HILANG TOTAL
-  // =========================================================================
   const cleanPath = pathname?.trim().toLowerCase();
   if (
     cleanPath === "/login" ||
@@ -79,7 +86,7 @@ export default function Navbar({
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
       <div className="custom-container h-16 md:h-20 flex items-center justify-between px-4 md:px-6">
-        {/* SISI KIRI: LOGO DINAMIS MENGIKUTI KEINGINAN FIGMA */}
+        {/* SISI KIRI: LOGO */}
         <Link href="/" className="flex items-center gap-3 select-none">
           <Image
             src={isBlackText ? "/images/logo.svg" : "/images/logo-white.svg"}
@@ -95,12 +102,12 @@ export default function Navbar({
           </span>
         </Link>
 
-        {/* SISI KANAN: NAVIGATION CONTROL */}
+        {/* SISI KANAN CONTROL */}
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            // ================= KONDISI A: PENGGUNA SUDAH LOGIN =================
-            <div className="flex items-center gap-4 select-none">
-              {/* TAS KERANJANG */}
+            // ================= SCREEN: AFTER LOGIN (DESKTOP & MOBILE AMAN) =================
+            <div className="flex items-center gap-3 md:gap-4 select-none">
+              {/* TAS KERANJANG BELANJA */}
               <Link
                 href="/cart"
                 className="relative p-2 hover:opacity-80 transition-opacity"
@@ -108,8 +115,8 @@ export default function Navbar({
                 <Image
                   src="/icons/icon-bag-white.svg"
                   alt="White bag"
-                  width="24"
-                  height="24"
+                  width={24}
+                  height={24}
                   className={isBlackText ? "hidden" : "block"}
                 />
                 <Image
@@ -124,7 +131,7 @@ export default function Navbar({
                 </span>
               </Link>
 
-              {/* AVATAR BUNDAR DAN SHEET PROFILE SIDE TOP */}
+              {/* PROFILE POPUP CONTROL (SIDE TOP) */}
               <Sheet>
                 <SheetTrigger asChild>
                   <div className="flex items-center gap-2 group cursor-pointer select-none">
@@ -137,6 +144,7 @@ export default function Navbar({
                         className="object-cover"
                       />
                     </div>
+                    {/* Teks nama hanya muncul di desktop sesuai request */}
                     <span
                       className={`text-sm font-bold tracking-tight hidden md:block ${isBlackText ? "text-gray-800" : "text-white"}`}
                     >
@@ -146,13 +154,13 @@ export default function Navbar({
                 </SheetTrigger>
                 <SheetContent
                   side="top"
-                  className="w-full max-w-60 md:max-w-159.5 lg:max-w-180 bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg rounded-2xl"
+                  className="w-full bg-white border-b border-gray-100 p-6 flex flex-col items-center justify-center shadow-lg rounded-2xl"
                 >
                   <SheetTitle className="hidden">
                     User Profile Navigation
                   </SheetTitle>
                   <SheetDescription className="hidden">
-                    Quick links for user configuration
+                    Quick links
                   </SheetDescription>
                   <div className="w-full max-w-xs bg-white rounded-2xl border border-gray-100 p-4 shadow-xs flex flex-col gap-3">
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
@@ -171,7 +179,7 @@ export default function Navbar({
                       </span>
                     </div>
                     <Link
-                      href="/address"
+                      href="/profile"
                       className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
                     >
                       <Image
@@ -179,22 +187,8 @@ export default function Navbar({
                         alt="address"
                         width={16}
                         height={16}
-                        className="text-gray-400"
                       />{" "}
-                      Delivery Address
-                    </Link>
-                    <Link
-                      href="/orders"
-                      className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-bold text-xs py-1 transition-colors"
-                    >
-                      <Image
-                        src="/icons/icon-bag-black.svg"
-                        alt="bag"
-                        width={16}
-                        height={16}
-                        className="text-gray-400"
-                      />{" "}
-                      My Orders
+                      Delivery Address / Profile
                     </Link>
                     <button
                       onClick={() => {
@@ -209,7 +203,6 @@ export default function Navbar({
                         alt="logout"
                         width={16}
                         height={16}
-                        className="text-red-400"
                       />{" "}
                       Logout
                     </button>
@@ -218,9 +211,8 @@ export default function Navbar({
               </Sheet>
             </div>
           ) : (
-            // ================= KONDISI B: USER BELUM LOGIN (PURE ROUTING SANGAT BERSIH) =================
+            // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
-              {/* DISPLAY DESKTOP VIEW: Klik langsung loncat ke rute murni halaman penuh */}
               <div className="hidden md:flex items-center gap-4">
                 <Link href="/login">
                   <Button
@@ -239,8 +231,6 @@ export default function Navbar({
                   </Button>
                 </Link>
               </div>
-
-              {/* DISPLAY MOBILE VIEW: Icon hamburger langsung menembak ke rute murni /login */}
               <div className="md:hidden">
                 <Link
                   href="/login"

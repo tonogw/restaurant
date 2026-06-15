@@ -13,3 +13,11 @@ export interface MenuCardProps {
   onUpdateQty: (cartItemId: number, newQty: number) => void;
   isAddPending: boolean;
 }
+
+export interface PromoItem {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  linkUrl?: string;
+}
