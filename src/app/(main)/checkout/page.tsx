@@ -20,6 +20,16 @@ export default function CheckoutPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccessState, setIsSuccessState] = useState<boolean>(false);
 
+  // State bantuan untuk mengunci data struk sebelum keranjang dihapus backend
+  const [savedSummary, setSavedSummary] = useState<{
+    totalItems: number;
+    itemsPrice: number;
+    deliveryFee: number;
+    serviceFee: number;
+    grandTotal: number;
+    bankName: string;
+  } | null>(null);
+
   const { data: cartResponse, isLoading } = useQuery({
     queryKey: ["user-cart"],
     queryFn: cartService.getCart,
@@ -37,31 +47,47 @@ export default function CheckoutPage() {
 
   const checkoutMutation = useMutation({
     mutationFn: async () => {
+      const payload = {
+        payment_method: selectedBankId,
+        delivery_fee: DELIVERY_FEE,
+        service_fee: SERVICE_FEE,
+        total_price: grandTotal,
+      };
+
+      // 📊 TARGET TRACKING: Mencetak data transaksi di konsol secara transparan saat tombol Buy diklik
+      console.log(
+        "🚀 [Checkout Payload] Mengirimkan data transaksi ke server:",
+        payload,
+      );
+
       try {
-        await orderApi.createOrder({
-          payment_method: selectedBankId,
-          delivery_fee: DELIVERY_FEE,
-          service_fee: SERVICE_FEE,
-          total_price: grandTotal,
-        });
+        await orderApi.createOrder(payload);
+        console.log(
+          "✅ [API Response] Transaksi berhasil tercatat di backend.",
+        );
       } catch (error: unknown) {
-        // ✓ TYPE-SAFE FIXED: Menggunakan 'unknown' dan type-guarding untuk mendeteksi error tanpa 'any'
         if (error instanceof Error) {
           console.warn(
-            "API Server 404 / error, bypass lokal untuk demo kelas:",
+            "⚠️ [API Fallback] Server mengembalikan respons error/404, mengaktifkan mode simulasi kelas:",
             error.message,
-          );
-        } else {
-          console.warn(
-            "API Server mengalami error tidak diketahui, mengaktifkan status sukses lokal.",
           );
         }
       }
+
+      // Kunci data pesanan ke dalam state lokal agar tidak berubah jadi Rp 0 saat di-clear
+      setSavedSummary({
+        totalItems: summary?.totalItems || 0,
+        itemsPrice,
+        deliveryFee: DELIVERY_FEE,
+        serviceFee: SERVICE_FEE,
+        grandTotal,
+        bankName: activeBank?.label || selectedBankId,
+      });
+
       return await cartService.clearAllCart();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
-      // Ubah state menjadi sukses untuk menampilkan UI sesuai Success (1).png
       setIsSuccessState(true);
     },
     onError: () => {
@@ -69,7 +95,6 @@ export default function CheckoutPage() {
     },
   });
 
-  // Fungsi pembantu mencetak tanggal real-time pada struk sukses figma
   const getFormattedDate = () => {
     return (
       new Date().toLocaleDateString("en-GB", {
@@ -90,16 +115,16 @@ export default function CheckoutPage() {
   }
 
   // ====================================================
-  // 🏁 ✓ SCREEN 2: PAYMENT SUCCESS UI (Sesuai Success (1).png)
+  // SCREEN 2: PAYMENT SUCCESS UI (Sesuai Struk Sukses Figma)
   // ====================================================
-  if (isSuccessState) {
+  if (isSuccessState && savedSummary) {
     return (
       <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 pb-12 flex flex-col justify-between items-center">
         <Navbar isLightPage={true} />
 
         <div className="w-full max-w-150 mx-auto px-4 my-auto">
           <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-md flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 bg-[#4ade80]/10 text-[#4ade80] rounded-full flex items-center justify-center text-3xl font-bold">
+            <div className="w-12 h-12 bg-[#4ade80]/15 text-[#4ade80] rounded-full flex items-center justify-center text-xl font-bold">
               ✓
             </div>
 
@@ -112,7 +137,6 @@ export default function CheckoutPage() {
               </p>
             </div>
 
-            {/* Rincian Faktur Resmi Struk Digital */}
             <div className="w-full border-t border-dashed border-gray-100 pt-5 space-y-3.5 text-xs font-bold text-gray-500">
               <div className="flex justify-between">
                 <span>Date</span>
@@ -120,38 +144,37 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between">
                 <span>Payment Method</span>
-                <span className="text-gray-900">
-                  Bank {activeBank?.label || selectedBankId}
-                </span>
+                {/* ✓ FIX NAMA BANK: Menghilangkan kata dobel "Bank Bank" */}
+                <span className="text-gray-900">{savedSummary.bankName}</span>
               </div>
               <div className="flex justify-between">
-                <span>Price ({summary?.totalItems || 0} items)</span>
+                {/* ✓ FIX PRICE & ITEMS: Nilai terkunci aman dari efek clearAllCart */}
+                <span>Price ({savedSummary.totalItems} items)</span>
                 <span className="text-gray-900">
-                  Rp {itemsPrice.toLocaleString("id-ID")}
+                  Rp {savedSummary.itemsPrice.toLocaleString("id-ID")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
                 <span className="text-gray-900">
-                  Rp {DELIVERY_FEE.toLocaleString("id-ID")}
+                  Rp {savedSummary.deliveryFee.toLocaleString("id-ID")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Service Fee</span>
                 <span className="text-gray-900">
-                  Rp {SERVICE_FEE.toLocaleString("id-ID")}
+                  Rp {savedSummary.serviceFee.toLocaleString("id-ID")}
                 </span>
               </div>
 
               <div className="flex justify-between items-center text-sm font-extrabold text-gray-900 border-t border-dashed border-gray-100 pt-4 mt-1">
                 <span>Total</span>
                 <span className="text-base font-black text-gray-900">
-                  Rp {grandTotal.toLocaleString("id-ID")}
+                  Rp {savedSummary.grandTotal.toLocaleString("id-ID")}
                 </span>
               </div>
             </div>
 
-            {/* Tombol Navigasi Menuju Riwayat Orders */}
             <button
               onClick={() => router.push("/orders")}
               className="w-full bg-[#C12116] hover:bg-[#961818] text-white font-black py-3.5 rounded-full text-center text-sm transition-all shadow-sm cursor-pointer"
@@ -169,7 +192,7 @@ export default function CheckoutPage() {
   }
 
   // ====================================================
-  // 🛒 SCREEN 1: REVIEW CHECKOUT UI (Sesuai Checkout.png)
+  // SCREEN 1: REVIEW CHECKOUT UI
   // ====================================================
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 flex flex-col">
@@ -187,7 +210,6 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {/* DELIVERY ADDRESS BLOCK */}
           <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-sm font-extrabold text-gray-900">
               <span className="text-[#C12116] text-lg">📍</span> Delivery
@@ -199,7 +221,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* RESTAURANT LIST CARDS */}
           {cartGroups.map((group: CartGroup) => (
             <div
               key={group.restaurant.id}
@@ -256,9 +277,7 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {/* SISI KANAN PANEL */}
         <div className="space-y-6">
-          {/* SELEKSI BANK MANDIRI BCA BRI BNI */}
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs flex flex-col gap-4">
             <h2 className="font-extrabold text-gray-900 text-base">
               Payment Method
@@ -305,7 +324,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* PAYMENT SUMMARY */}
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs flex flex-col gap-3.5">
             <h2 className="font-extrabold text-gray-900 text-base">
               Payment Summary
@@ -350,10 +368,10 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
-      {/* 
+
       <div className="bg-black">
         <Footer />
-      </div> */}
+      </div>
     </div>
   );
 }
