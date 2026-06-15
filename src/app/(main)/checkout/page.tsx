@@ -350,10 +350,10 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
-
+      {/* 
       <div className="bg-black">
         <Footer />
-      </div>
+      </div> */}
     </div>
   );
 }
