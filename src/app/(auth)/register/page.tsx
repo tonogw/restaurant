@@ -39,7 +39,7 @@ export default function RegisterPage() {
       const token = response.data.token;
       localStorage.setItem("token", token);
 
-      // Memicu reaktivitas Navbar secara instan tanpa refresh
+      // To trigger isLoggedIn in navbar
       setToken(token);
 
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
@@ -57,7 +57,7 @@ export default function RegisterPage() {
 
   const onSubmit = (data: RegisterUser) => {
     setErrorMessage(null);
-    // Menggunakan nama _confirmPassword agar dibaca valid dan tidak memicu warning TS unused value
+    // Not required in async
     const { confirmPassword: _confirmPassword, ...payload } = data;
     mutation.mutate(payload);
   };

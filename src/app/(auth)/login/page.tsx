@@ -39,7 +39,7 @@ export default function LoginPage() {
       const token = response.data.token;
       localStorage.setItem("token", token);
 
-      // Memicu reaktivitas Navbar secara instan tanpa refresh
+      // To trigger isLoggedIn for Navbar
       setToken(token);
 
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });

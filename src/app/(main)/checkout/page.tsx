@@ -58,7 +58,7 @@ export default function CheckoutPage() {
             Review Your Order
           </h1>
 
-          {/* ERROR / SUCCESS BANNER (Consistent with your Login/Register pages) */}
+          {/* ERROR / SUCCESS BANNER isLoogedIn */}
           {errorMessage && (
             <div className="p-4 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100">
               ⚠ {errorMessage}
