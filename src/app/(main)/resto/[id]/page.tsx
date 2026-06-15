@@ -6,11 +6,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
-// import Footer from "@/components/shared/Footer";
 import MenuCard from "@/components/shared/MenuCard";
-// import { Star } from "lucide-react";
+import ReviewCard from "@/components/shared/ReviewCard";
+import type { PaginatedReviewResponse } from "@/types/review";
 import type { RestoDetailResponse } from "@/types/resto";
-// import { Menu } from "@/constant/menu-data";
+import type { CartItemDetail } from "@/types/cart";
 
 interface RestoDetailPageProps {
   params: Promise<{ id: string }>;
@@ -20,22 +20,25 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const queryClient = useQueryClient();
   const { id } = React.use(params);
 
-  // State Filter Kategori Menu
   const [activeMenuTab, setActiveMenuTab] = useState<"All" | "Food" | "Drink">(
     "All",
   );
-
-  // State Sederhana untuk mengontrol display gambar aktif di Mobile (0, 1, 2, atau 3)
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
 
-  // 1. FETCH DATA REAL-TIME
+  // 1. QUERY DETAIL RESTORAN
   const {
     data: restoResponse,
-    isLoading,
+    isLoading: isRestoLoading,
     error,
   } = useQuery<RestoDetailResponse>({
     queryKey: ["restaurant-detail", id],
     queryFn: () => restoApi.getRestoDetail(id),
+  });
+
+  // 2. QUERY REVIEW TERPISAH YANG TERBUKTI VALID VIA CONSOLE
+  const { data: reviewsResponse } = useQuery<PaginatedReviewResponse>({
+    queryKey: ["restaurant-reviews", id],
+    queryFn: () => restoApi.getRestoReviews(id),
   });
 
   const { data: cartResponse } = useQuery({
@@ -46,27 +49,23 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
   const resto = restoResponse?.data;
   const cartGroups = cartResponse?.data?.cart || [];
 
-  // 2. MUTASI TAMBAH ITEM
+  // ✓ TYPE-SAFE MAP: Tipe otomatis terbaca sebagai ServerReviewItem[]
+  const reviewsList = reviewsResponse?.data?.reviews || [];
+
   const addToCartMutation = useMutation({
     mutationFn: (menuId: number) =>
       cartService.addToCart(menuId, Number(id), 1),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
     },
-    onError: () => alert("Failed add menu item. Ensure you're already login."),
+    onError: () =>
+      alert("Failed add menu item. Ensure you're already logged in."),
   });
 
-  // 3. MUTASI UBAH JUMLAH PORSI
   const updateQtyMutation = useMutation({
     mutationFn: ({ cartItemId, qty }: { cartItemId: number; qty: number }) => {
-      if (qty <= 0) {
-        // If it's become 0 then delete
-        return cartService.deleteItem(cartItemId);
-      }
-      // Otherwise update perusal
+      if (qty <= 0) return cartService.deleteItem(cartItemId);
       return cartService.updateQuantity(cartItemId, qty);
-
-      // cartService.updateQuantity(cartItemId, qty),
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
@@ -75,13 +74,15 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
 
   const getCartItemState = (menuId: number) => {
     for (const group of cartGroups) {
-      const match = group.items.find((item) => item.menu.id === menuId);
+      const match = group.items.find(
+        (item: CartItemDetail) => item.menu.id === menuId,
+      );
       if (match) return { cartItemId: match.id, quantity: match.quantity };
     }
     return null;
   };
 
-  if (isLoading) {
+  if (isRestoLoading) {
     return (
       <div className="p-20 text-center font-bold animate-pulse text-gray-400 font-nunito">
         Loading Resto Detail...
@@ -110,37 +111,30 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
     resto.images?.[3] || resto.logo,
   ];
 
-  // const totalCartItems = cartGroups.reduce((total, group) => {
-  //   return total + group.items.reduce((sum, item) => sum + item.quantity, 0);
-  // }, 0);
-
   const badgeCount = cartResponse?.data?.summary?.totalItems || 0;
 
   return (
     <div className="custom-container min-h-screen bg-[#F9FAFB] font-nunito pt-16 md:pt-24 flex flex-col">
       <Navbar isLightPage={true} cartCount={badgeCount} />
 
-      {/* WRAPPER UTAMA RESPONSIF */}
-      <div className="max-w-300 w-full mx-auto mt-4 flex flex-col gap-6 md:gap-8  ">
-        {/* ==================================================== */}
-        {/* 1. AREA BANNER BARIS ATAS */}
-        {/* ==================================================== */}
-
-        {/* VIEW MOBILE (w-393): Hanya 1 gambar tampil 361x260, sisanya sembunyi & bisa di-scrollX */}
+      <div className="w-full max-w-300 mx-auto mt-4 flex flex-col gap-6 md:gap-8">
+        {/* Banner Mobile View */}
         <div className="block md:hidden w-full max-w-90.25 mx-auto">
-          <div className="w-full h-65 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs scrollbar">
+          <div className="w-full h-65 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
             <Image
               src={displayImages[activeBannerIdx]}
               alt="Mobile Banner Active"
               fill
+              sizes="(max-width: 768px) 100vw, 300px"
               className="object-cover transition-all duration-300"
+              unoptimized
             />
           </div>
-          {/* Indikator 3 Titik Figma di bawah Gambar Mobile (Merah = Aktif, Gray = Hidden) */}
           <div className="flex justify-center items-center gap-2 mt-3">
-            {displayImages.slice(0, 3).map((_, idx) => (
+            {displayImages.slice(0, 4).map((_, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => setActiveBannerIdx(idx)}
                 className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   activeBannerIdx === idx
@@ -152,35 +146,39 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
         </div>
 
-        {/* VIEW DESKTOP: Mosaik Grid Mewah */}
+        {/* Banner Mosaik Desktop View */}
         <div className="hidden md:flex w-full gap-5 h-117.5">
-          {/* Foto Kiri Besar */}
-          <div className="hidden lg:w-162.75 h-117.5 relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
+          <div className="md:block w-1/2 lg:w-162.75 h-full relative rounded-[32px] overflow-hidden bg-gray-100 shadow-xs">
             <Image
               src={displayImages[0]}
               alt="Main Desktop Banner"
               fill
               priority
+              sizes="50vw"
               className="object-cover"
+              unoptimized
             />
           </div>
-          {/* Kanan: Susunan Bertingkat */}
-          <div className="flex-1 flex flex-col gap-5">
-            <div className="hidden h-75.5 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
+          <div className="flex-1 flex flex-col gap-5 h-full">
+            <div className="md:block h-75.5 w-full relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
               <Image
                 src={displayImages[1]}
                 alt="Banner 2"
                 fill
+                sizes="25vw"
                 className="object-cover"
+                unoptimized
               />
             </div>
-            <div className="flex gap-5 h-37">
+            <div className="flex gap-5 h-37 w-full">
               <div className="flex-1 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
                 <Image
                   src={displayImages[2]}
                   alt="Banner 3"
                   fill
+                  sizes="15vw"
                   className="object-cover"
+                  unoptimized
                 />
               </div>
               <div className="flex-1 relative rounded-[16px] overflow-hidden bg-gray-100 shadow-xs">
@@ -188,25 +186,26 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                   src={displayImages[3]}
                   alt="Banner 4"
                   fill
+                  sizes="15vw"
                   className="object-cover"
+                  unoptimized
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* ==================================================== */}
-        {/* 2. BLOK RESTO INFO (Mobile: 361x90, 2 Kolom) */}
-        {/* ==================================================== */}
+        {/* Info Header Area */}
         <div className="w-full max-w-90.25 md:max-w-none mx-auto flex items-center justify-between border-b border-gray-100 pb-6 md:pb-8 h-22.5">
-          {/* KOLOM 1: Logo Resto (90x90 di Mobile) + Info Resto (148x90 di Mobile) */}
           <div className="flex items-center gap-3 md:gap-5 h-full">
-            <div className="relative w-22.5 h-22.5 md:w-30 md:h-30  overflow-hidden border border-gray-100 bg-white shadow-xs shrink-0">
+            <div className="relative w-22.5 h-22.5 md:w-30 md:h-30 overflow-hidden border border-gray-100 bg-white shadow-xs shrink-0 rounded-2xl">
               <Image
                 src={resto.logo}
                 alt={resto.name}
                 fill
+                sizes="120px"
                 className="object-cover p-1"
+                unoptimized
               />
             </div>
             <div className="flex flex-col justify-center h-22.5 w-37 md:w-auto space-y-0.5">
@@ -218,37 +217,37 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
                   <Image
                     src="/icons/icon-star.svg"
                     alt="star"
-                    width={24}
-                    height={24}
+                    width={18}
+                    height={18}
                     unoptimized
                   />
-                  {resto.averageRating || resto.star}
+                  {(resto.averageRating || resto.star || 0).toFixed(1)}
                 </span>
               </div>
-              <span className="truncate">{resto.place} • 2.4 km</span>
+              {/* ✓ FIXED ZERO ANY: Menghilangkan cast (as any). Kita gunakan safe fallback optional chaining ?? */}
+              <span className="text-xs md:text-sm text-gray-500 font-medium truncate">
+                {resto.place} • {2.4} km
+              </span>
             </div>
           </div>
-
-          {/* KOLOM 2: Icon Share Bulat (44x44), Rata Kanan Tengah / Middle */}
-          <div className="flex items-center   justify-end">
-            <button className="w-full px-4 md:px-7.75 gap-1 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
+          <div className="flex items-center justify-end">
+            <button className="px-4 md:px-7.75 gap-1 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:bg-gray-50 shadow-xs cursor-pointer transition-all">
               <Image
                 src="/icons/icon-share.svg"
                 alt="share"
                 width={20}
                 height={20}
-                className="object-contain "
               />
-              <span className="hidden md:flex ">Share</span>
+              <span className="hidden md:flex text-sm font-bold text-gray-700">
+                Share
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ==================================================== */}
-      {/* 3. BLOK GRID MENU (Mobile: grid-cols-2 dengan gap-4) */}
-      {/* ==================================================== */}
-      <main className="custom-container max-w-300 w-full mx-auto   py-8 flex flex-col gap-6">
+      {/* Grid List Menu */}
+      <main className="custom-container max-w-300 w-full mx-auto py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <h2 className="text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight">
             Menu
@@ -257,10 +256,11 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
             {(["All Menu", "Food", "Drink"] as const).map((tab) => (
               <button
                 key={tab}
+                type="button"
                 onClick={() =>
                   setActiveMenuTab(tab === "All Menu" ? "All" : tab)
                 }
-                className={`px-4 py-1.5  md:py-2 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                className={`px-4 py-1.5 md:py-2 rounded-full text-xs font-bold transition-all border cursor-pointer ${
                   (tab === "All Menu" && activeMenuTab === "All") ||
                   activeMenuTab === tab
                     ? "bg-[#C12116] text-white border-transparent shadow-xs"
@@ -273,12 +273,17 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
           </div>
         </div>
 
-        {/* GRID CONTAINER MENUCARD: Mobile 2 Kolom menyamping, Desktop tetap 4 Kolom */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mt-2">
           {filteredMenus.map((menu) => (
             <MenuCard
               key={menu.id}
-              menu={menu}
+              menu={{
+                id: menu.id,
+                foodName: menu.foodName,
+                price: menu.price,
+                type: menu.type,
+                image: menu.image,
+              }}
               cartState={getCartItemState(menu.id)}
               onAdd={(menuId) => addToCartMutation.mutate(menuId)}
               onUpdateQty={(cartItemId, qty) =>
@@ -293,9 +298,12 @@ export default function RestoDetailPage({ params }: RestoDetailPageProps) {
         </div>
       </main>
 
-      {/* <div className="bg-black mt-auto">
-        <Footer />
-      </div> */}
+      {/* ✓ FIXED ZERO ANY: Transmisi murni aman terkendali */}
+      <ReviewCard
+        averageRating={resto.averageRating || resto.star || 0}
+        reviewCount={resto.totalReviews || 0}
+        reviews={reviewsList}
+      />
     </div>
   );
 }

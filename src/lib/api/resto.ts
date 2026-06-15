@@ -1,5 +1,6 @@
 import api from "./axios";
 import type { RestoResponse, RestoDetailResponse } from "@/types/resto";
+import type { PaginatedReviewResponse } from "@/types/review";
 
 export const restoApi = {
   getRestaurants: async (
@@ -19,6 +20,13 @@ export const restoApi = {
 
   getRestoDetail: async (id: string): Promise<RestoDetailResponse> => {
     const response = await api.get<RestoDetailResponse>(`/api/resto/${id}`);
+    return response.data;
+  },
+
+  getRestoReviews: async (id: string): Promise<PaginatedReviewResponse> => {
+    const response = await api.get<PaginatedReviewResponse>(
+      `/api/review/restaurant/${id}`,
+    );
     return response.data;
   },
 };

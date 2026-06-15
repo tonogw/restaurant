@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import type { CartGroup } from "@/types/cart";
 
 export default function CheckoutPage() {
   const queryClient = useQueryClient();
@@ -70,7 +71,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {cartGroups.map((group) => (
+          {cartGroups.map((group: CartGroup) => (
             <div
               key={group.restaurant.id}
               className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-4"

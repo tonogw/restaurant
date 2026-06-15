@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cartService } from "@/services/cartService";
 import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
-import type { CartItemDetail, CartGroup, CartResponse } from "@/types/resto";
+import type { CartItemDetail, CartGroup, CartResponse } from "@/types/cart";
+import Link from "next/link";
 
 export default function CartPage() {
   const queryClient = useQueryClient();
@@ -79,15 +79,20 @@ export default function CartPage() {
                       src={group.restaurant.logo}
                       alt="resto logo"
                       fill
+                      sizes="32px"
                       className="object-cover"
                     />
                   </div>
-                  <h2 className="font-extrabold text-gray-900 text-base">
-                    {group.restaurant.name}
+                  {/* ✓ STRUKTUR HOOK LINK BARU: Nama restoran bisa diklik untuk kembali belanja menu lain */}
+                  <h2 className="font-extrabold text-gray-900 text-base hover:text-[#C12116] transition-colors">
+                    <Link href={`/resto/${group.restaurant.id}`}>
+                      {group.restaurant.name}
+                    </Link>
                   </h2>
                 </div>
 
                 <div className="divide-y divide-gray-50">
+                  {/* ✓ TYPE-SAFE FIXED: Deklarasi item sebagai CartItemDetail secara ketat menghilangkan eror implicit any */}
                   {group.items.map((item: CartItemDetail) => (
                     <div
                       key={item.id}
@@ -98,6 +103,7 @@ export default function CartPage() {
                           src={item.menu.image}
                           alt={item.menu.foodName}
                           fill
+                          sizes="64px"
                           className="object-cover"
                         />
                       </div>
@@ -158,13 +164,15 @@ export default function CartPage() {
                           if (confirm("Remove item?"))
                             deleteItemMutation.mutate(item.id);
                         }}
-                        className="p-2 cursor-pointer hover:opacity-70 flex-shrink-0"
+                        className="p-2 cursor-pointer hover:opacity-70 shrink-0"
                       >
+                        {/* ✓ FIXED SINKRON TERMINAL: Memanggil aset icon-trash-white.svg yang terbukti valid ada di MacBook Anda */}
                         <Image
-                          src="/icons/icon-delete-address.svg"
+                          src="/icons/icon-trash-white.svg"
                           alt="trash"
                           width={20}
                           height={20}
+                          className="invert brightness-50"
                         />
                       </button>
                     </div>

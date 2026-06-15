@@ -1,5 +1,5 @@
 import api from "@/lib/api/axios";
-import type { CartResponse } from "@/types/resto";
+import type { CartResponse } from "@/types/cart";
 
 export const cartService = {
   // Ambil isi keranjang belanja
