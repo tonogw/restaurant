@@ -228,7 +228,11 @@ export default function CheckoutPage() {
             >
               <div className="pb-2 border-b border-gray-50 flex items-center justify-between">
                 <div className="font-extrabold text-gray-900 text-sm flex items-center gap-2">
-                  <span>🏪</span> {group.restaurant.name}
+                  <span>
+                    🏪
+                    <Image src="/icons/icon-md.svg" alt="resto booth" />
+                  </span>{" "}
+                  {group.restaurant.name}
                 </div>
                 <Link
                   href={`/resto/${group.restaurant.id}`}
