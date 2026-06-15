@@ -1,3 +1,4 @@
+// import AddressModal from "@/components/shared/AddressModal";
 import { z } from "zod";
 
 // Validation schema
@@ -34,9 +35,12 @@ export const loginSchema = z.object({
 export type LoginInputs = z.infer<typeof loginSchema>;
 
 // Update endUser profile use existing by remove password
-export const UpdateProfileSchema = baseRegisterObject.omit({
-  password: true,
-  confirmPassword: true,
-});
-
+export const UpdateProfileSchema = baseRegisterObject
+  .omit({
+    // password: true,
+    // confirmPassword: true,
+  })
+  .extend({
+    address: z.string().optional(),
+  });
 export type UpdateUserInput = z.infer<typeof UpdateProfileSchema>;

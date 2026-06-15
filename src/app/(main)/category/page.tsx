@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
 import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
+
 import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import Image from "next/image";

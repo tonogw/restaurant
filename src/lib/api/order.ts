@@ -1,55 +1,10 @@
 import api from "./axios";
-
-export interface CreateOrderPayload {
-  payment_method: string;
-  delivery_fee: number;
-  service_fee: number;
-  total_price: number;
-}
-
-export interface CreateOrderResponse {
-  success: boolean;
-  message: string;
-  data: {
-    transaction_id: string;
-    status: string;
-    total_price: number;
-  };
-}
-
-export type TransactionStatus =
-  | "preparing"
-  | "on_the_way"
-  | "delivered"
-  | "cancelled";
-
-export interface OrderItem {
-  id: number;
-  menu: {
-    id: number;
-    foodName: string;
-    price: number;
-    image: string;
-  };
-  quantity: number;
-}
-
-export interface TransactionItem {
-  transaction_id: string;
-  payment_method: string;
-  price: number;
-  service_fee: number;
-  delivery_fee: number;
-  total_price: number;
-  status: TransactionStatus;
-  restaurant_name?: string; // Fallback visual nama resto di Figma
-  items: OrderItem[];
-}
-
-export interface OrderHistoryResponse {
-  success: boolean;
-  data: TransactionItem[];
-}
+import type { CreateReviewPayload, CreateReviewResponse } from "@/types/review";
+import type {
+  CreateOrderPayload,
+  CreateOrderResponse,
+  OrderHistoryResponse,
+} from "@/types/order";
 
 export const orderApi = {
   createOrder: async (
@@ -67,6 +22,19 @@ export const orderApi = {
     const response = await api.get<OrderHistoryResponse>(
       "/api/transaction/user",
     );
+    return response.data;
+  },
+
+  postReview: async (
+    payload: CreateReviewPayload,
+  ): Promise<CreateReviewResponse> => {
+    // Jika backend kamu ternyata strict menggunakan camelCase untuk request body,
+    // kamu bisa sesuaikan kuncinya menjadi: transactionId: payload.transaction_id
+    const response = await api.post<CreateReviewResponse>("/api/review", {
+      transaction_id: payload.transaction_id,
+      star: payload.star,
+      comment: payload.comment,
+    });
     return response.data;
   },
 };

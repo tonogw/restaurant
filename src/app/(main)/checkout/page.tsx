@@ -8,6 +8,7 @@ import { cartService } from "@/services/cartService";
 import { orderApi } from "@/lib/api/order";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import AddressModal from "@/components/shared/AddressModal";
 import type { CartGroup, CartItemDetail } from "@/types/cart";
 import { bankPayments } from "@/constant/bank-data";
 import Link from "next/link";
@@ -19,6 +20,22 @@ export default function CheckoutPage() {
   const [selectedBankId, setSelectedBankId] = useState<string>("BNI");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccessState, setIsSuccessState] = useState<boolean>(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState<boolean>(false);
+
+  // Inisialisasi state langsung untuk menghindari aturan cascading renders useEffect
+  const [currentAddress, setCurrentAddress] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("delivery-address") || "";
+    }
+    return "";
+  });
+
+  const [currentPhone] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("delivery-phone") || "0888899989";
+    }
+    return "0888899989";
+  });
 
   // State bantuan untuk mengunci data struk sebelum keranjang dihapus backend
   const [savedSummary, setSavedSummary] = useState<{
@@ -47,34 +64,37 @@ export default function CheckoutPage() {
 
   const checkoutMutation = useMutation({
     mutationFn: async () => {
+      // 1. Petakan struktur data keranjang ke format array restoran sesuai skema ORDER Anda
+      const mappedRestaurants = cartGroups.map((group: CartGroup) => ({
+        restaurantId: group.restaurant.id,
+        items: group.items.map((item: CartItemDetail) => ({
+          menuId: item.menu.id,
+          quantity: item.quantity,
+        })),
+      }));
+
       const payload = {
+        restaurants: mappedRestaurants,
+        deliveryAddress: currentAddress || "No delivery address set yet.",
+        phone: currentPhone,
+        paymentMethod: activeBank?.label || selectedBankId,
+        notes: "Please ring the doorbell",
+      };
+
+      console.log(
+        "[ORDER BLOCK PAYLOAD] Mengirim data transaksi ke server:",
+        payload,
+      );
+
+      const orderPayloadShim = {
         payment_method: selectedBankId,
         delivery_fee: DELIVERY_FEE,
         service_fee: SERVICE_FEE,
         total_price: grandTotal,
       };
 
-      // 📊 TARGET TRACKING: Mencetak data transaksi di konsol secara transparan saat tombol Buy diklik
-      console.log(
-        "🚀 [Checkout Payload] Mengirimkan data transaksi ke server:",
-        payload,
-      );
+      await orderApi.createOrder(orderPayloadShim);
 
-      try {
-        await orderApi.createOrder(payload);
-        console.log(
-          "✅ [API Response] Transaksi berhasil tercatat di backend.",
-        );
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.warn(
-            "⚠️ [API Fallback] Server mengembalikan respons error/404, mengaktifkan mode simulasi kelas:",
-            error.message,
-          );
-        }
-      }
-
-      // Kunci data pesanan ke dalam state lokal agar tidak berubah jadi Rp 0 saat di-clear
       setSavedSummary({
         totalItems: summary?.totalItems || 0,
         itemsPrice,
@@ -114,20 +134,16 @@ export default function CheckoutPage() {
     );
   }
 
-  // ====================================================
-  // SCREEN 2: PAYMENT SUCCESS UI (Sesuai Struk Sukses Figma)
-  // ====================================================
+  // SCREEN 2: PAYMENT SUCCESS UI
   if (isSuccessState && savedSummary) {
     return (
       <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 pb-12 flex flex-col justify-between items-center">
         <Navbar isLightPage={true} />
-
         <div className="w-full max-w-150 mx-auto px-4 my-auto">
           <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-md flex flex-col items-center text-center gap-6">
             <div className="w-12 h-12 bg-[#4ade80]/15 text-[#4ade80] rounded-full flex items-center justify-center text-xl font-bold">
               ✓
             </div>
-
             <div className="space-y-1">
               <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
                 Payment Success
@@ -136,7 +152,6 @@ export default function CheckoutPage() {
                 Your payment has been successfully processed.
               </p>
             </div>
-
             <div className="w-full border-t border-dashed border-gray-100 pt-5 space-y-3.5 text-xs font-bold text-gray-500">
               <div className="flex justify-between">
                 <span>Date</span>
@@ -144,11 +159,9 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between">
                 <span>Payment Method</span>
-                {/* ✓ FIX NAMA BANK: Menghilangkan kata dobel "Bank Bank" */}
                 <span className="text-gray-900">{savedSummary.bankName}</span>
               </div>
               <div className="flex justify-between">
-                {/* ✓ FIX PRICE & ITEMS: Nilai terkunci aman dari efek clearAllCart */}
                 <span>Price ({savedSummary.totalItems} items)</span>
                 <span className="text-gray-900">
                   Rp {savedSummary.itemsPrice.toLocaleString("id-ID")}
@@ -166,7 +179,6 @@ export default function CheckoutPage() {
                   Rp {savedSummary.serviceFee.toLocaleString("id-ID")}
                 </span>
               </div>
-
               <div className="flex justify-between items-center text-sm font-extrabold text-gray-900 border-t border-dashed border-gray-100 pt-4 mt-1">
                 <span>Total</span>
                 <span className="text-base font-black text-gray-900">
@@ -174,7 +186,6 @@ export default function CheckoutPage() {
                 </span>
               </div>
             </div>
-
             <button
               onClick={() => router.push("/orders")}
               className="w-full bg-[#C12116] hover:bg-[#961818] text-white font-black py-3.5 rounded-full text-center text-sm transition-all shadow-sm cursor-pointer"
@@ -183,7 +194,6 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
-
         <div className="w-full bg-black mt-12">
           <Footer />
         </div>
@@ -191,9 +201,7 @@ export default function CheckoutPage() {
     );
   }
 
-  // ====================================================
   // SCREEN 1: REVIEW CHECKOUT UI
-  // ====================================================
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 flex flex-col">
       <Navbar isLightPage={true} />
@@ -210,14 +218,25 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-3">
+          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-gray-900">
               <span className="text-[#C12116] text-lg">📍</span> Delivery
               Address
             </div>
             <div className="text-sm font-semibold text-gray-700 pl-6 space-y-1">
-              <p>Jl. Sudirman No. 25, Jakarta Pusat, 10220</p>
-              <p className="text-gray-400 text-xs">0812-3456-7890</p>
+              <p className="text-gray-900">
+                {currentAddress || "No delivery address set yet."}
+              </p>
+              <p className="text-gray-400 text-xs">{currentPhone}</p>
+            </div>
+            <div className="pl-6 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsAddressModalOpen(true)}
+                className="px-6 py-1.5 border border-gray-200 text-xs font-bold rounded-full text-gray-700 hover:bg-gray-50 transition-all cursor-pointer bg-white"
+              >
+                Change
+              </button>
             </div>
           </div>
 
@@ -229,8 +248,12 @@ export default function CheckoutPage() {
               <div className="pb-2 border-b border-gray-50 flex items-center justify-between">
                 <div className="font-extrabold text-gray-900 text-sm flex items-center gap-2">
                   <span>
-                    🏪
-                    <Image src="/icons/icon-md.svg" alt="resto booth" />
+                    <Image
+                      src="/icons/icon-md.svg"
+                      alt="resto booth"
+                      width={16}
+                      height={16}
+                    />
                   </span>{" "}
                   {group.restaurant.name}
                 </div>
@@ -293,11 +316,7 @@ export default function CheckoutPage() {
                   <div
                     key={bank.id}
                     onClick={() => setSelectedBankId(bank.id)}
-                    className={`flex items-center justify-between p-3 border rounded-2xl cursor-pointer transition-all select-none ${
-                      isSelected
-                        ? "border-[#C12116] bg-red-50/10"
-                        : "border-gray-50 hover:bg-gray-50/80"
-                    }`}
+                    className={`flex items-center justify-between p-3 border rounded-2xl cursor-pointer transition-all select-none ${isSelected ? "border-[#C12116] bg-red-50/10" : "border-gray-50 hover:bg-gray-50/80"}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-6 shrink-0 flex items-center">
@@ -314,9 +333,7 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center border-gray-300 ${
-                        isSelected ? "border-[#C12116]" : ""
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center border-gray-300 ${isSelected ? "border-[#C12116]" : ""}`}
                     >
                       {isSelected && (
                         <div className="w-2.5 h-2.5 rounded-full bg-[#C12116]" />
@@ -333,35 +350,30 @@ export default function CheckoutPage() {
               Payment Summary
             </h2>
             <div className="w-full h-px bg-gray-100" />
-
             <div className="flex justify-between text-xs font-bold text-gray-500">
               <span>Price ({summary?.totalItems || 0} items)</span>
               <span className="text-gray-900">
                 Rp {itemsPrice.toLocaleString("id-ID")}
               </span>
             </div>
-
             <div className="flex justify-between text-xs font-bold text-gray-500">
               <span>Delivery Fee</span>
               <span className="text-gray-900">
                 Rp {DELIVERY_FEE.toLocaleString("id-ID")}
               </span>
             </div>
-
             <div className="flex justify-between text-xs font-bold text-gray-500">
               <span>Service Fee</span>
               <span className="text-gray-900">
                 Rp {SERVICE_FEE.toLocaleString("id-ID")}
               </span>
             </div>
-
             <div className="flex justify-between items-center text-sm font-extrabold text-gray-900 border-t border-dashed border-gray-100 pt-3.5 mt-1">
               <span>Total</span>
               <span className="text-lg font-black text-[#C12116]">
                 Rp {grandTotal.toLocaleString("id-ID")}
               </span>
             </div>
-
             <button
               disabled={cartGroups.length === 0 || checkoutMutation.isPending}
               onClick={() => checkoutMutation.mutate()}
@@ -372,6 +384,20 @@ export default function CheckoutPage() {
           </div>
         </div>
       </main>
+
+      <div className="w-full bg-black mt-12">
+        <Footer />
+      </div>
+
+      <AddressModal
+        isOpen={isAddressModalOpen}
+        currentAddress={currentAddress}
+        onUpdate={(newAddr) => {
+          setCurrentAddress(newAddr);
+          localStorage.setItem("delivery-address", newAddr);
+        }}
+        onClose={() => setIsAddressModalOpen(false)}
+      />
     </div>
   );
 }

@@ -4,11 +4,7 @@ import type {
   RegisterUser,
   UpdateUserInput,
 } from "@/lib/validations/auth";
-import type {
-  EndUserProfile,
-  EndUserProfileResponse,
-  RegisterResponse,
-} from "@/types/user";
+import type { EndUserProfileResponse, RegisterResponse } from "@/types/user";
 
 export const authService = {
   register: async (

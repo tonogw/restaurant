@@ -35,3 +35,22 @@ export interface PaginatedReviewResponse {
     };
   };
 }
+
+export interface CreateReviewPayload {
+  transaction_id: string; // Jika di swagger request body menggunakan format snake_case
+  star: number;
+  comment: string;
+}
+
+export interface CreateReviewResponse {
+  success: boolean;
+  message: string;
+  data: {
+    review: {
+      id: number;
+      star: number;
+      comment: string;
+      transactionId: string;
+    };
+  };
+}

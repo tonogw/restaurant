@@ -4,15 +4,21 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { orderApi, TransactionItem, TransactionStatus } from "@/lib/api/order";
+import { orderApi } from "@/lib/api/order";
+import type { TransactionStatus } from "@/types/order";
 import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
+// import Footer from "@/components/shared/Footer";
 import { STATUS_TABS } from "@/constant/order-status";
+import ReviewModal from "@/components/shared/ReviewModal";
 
 export default function MyOrdersPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TransactionStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const [selectedReviewTxId, setSelectedReviewTxId] = useState<string | null>(
+    null,
+  );
 
   // Fetch transactional data to api server
   const { data: ordersResponse, isLoading } = useQuery({
@@ -70,7 +76,15 @@ export default function MyOrdersPage() {
 
           <nav className="flex flex-col gap-2.5 text-sm font-bold">
             <button className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:bg-gray-50 text-left transition-all cursor-pointer">
-              <span>📍</span> Delivery Address
+              <span>
+                <Image
+                  src="/icons/icon-delivery-address.svg"
+                  alt="delivery address"
+                  width={16}
+                  height={16}
+                />
+              </span>{" "}
+              Delivery Address
             </button>
             <button className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-red-50/40 text-[#C12116] text-left transition-all cursor-pointer">
               <span>📄</span> My Orders
@@ -201,7 +215,9 @@ export default function MyOrdersPage() {
 
                     {order.status === "delivered" && (
                       <button
-                        onClick={() => router.push(`/resto/1`)}
+                        onClick={() =>
+                          setSelectedReviewTxId(order.transaction_id)
+                        }
                         className="bg-[#C12116] hover:bg-[#961818] text-white font-black text-xs px-6 py-2.5 rounded-full text-center transition-all shadow-xs cursor-pointer"
                       >
                         Give Review
@@ -214,6 +230,11 @@ export default function MyOrdersPage() {
           </div>
         </div>
       </main>
+      <ReviewModal
+        isOpen={selectedReviewTxId !== null}
+        transactionId={selectedReviewTxId || ""}
+        onClose={() => setSelectedReviewTxId(null)}
+      />
 
       {/* <Footer /> */}
     </div>

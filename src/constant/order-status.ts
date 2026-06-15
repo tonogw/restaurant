@@ -1,4 +1,4 @@
-import type { TransactionStatus } from "@/lib/api/order";
+import type { TransactionStatus } from "@/types/order";
 
 export interface StatusTab {
   id: TransactionStatus | "all";

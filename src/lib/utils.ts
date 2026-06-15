@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getImageUrl(path: string | null | undefined, size: string) {
+export function getImageUrl(path: string | null | undefined) {
   if (!path) {
     return "/api/resto";
   }

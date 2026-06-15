@@ -57,7 +57,10 @@ export default function RegisterPage() {
 
   const onSubmit = (data: RegisterUser) => {
     setErrorMessage(null);
-    // Not required in async
+    //   Not required in async
+
+    // @ts-ignor
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword: _confirmPassword, ...payload } = data;
     mutation.mutate(payload);
   };
