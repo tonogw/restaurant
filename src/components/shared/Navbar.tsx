@@ -35,9 +35,6 @@ export default function Navbar({
 
   const isBlackText = scrolled || isLightPage;
 
-  // =========================================================================
-  // ✓ SINKRONISASI MUTLAK: Amankan Token dari LocalStorage agar State tidak Null
-  // =========================================================================
   useEffect(() => {
     const localToken = localStorage.getItem("token");
     if (localToken && !token) {
@@ -86,7 +83,6 @@ export default function Navbar({
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${isBlackText ? "bg-white shadow-sm border-b border-gray-100" : "bg-transparent"}`}
     >
       <div className="custom-container h-16 md:h-20 flex items-center justify-between px-4 md:px-6">
-        {/* SISI KIRI: LOGO */}
         <Link href="/" className="flex items-center gap-3 select-none">
           <Image
             src={isBlackText ? "/images/logo.svg" : "/images/logo-white.svg"}
@@ -102,12 +98,9 @@ export default function Navbar({
           </span>
         </Link>
 
-        {/* SISI KANAN CONTROL */}
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            // ================= SCREEN: AFTER LOGIN (DESKTOP & MOBILE AMAN) =================
             <div className="flex items-center gap-3 md:gap-4 select-none">
-              {/* TAS KERANJANG BELANJA */}
               <Link
                 href="/cart"
                 className="relative p-2 hover:opacity-80 transition-opacity"
@@ -131,7 +124,6 @@ export default function Navbar({
                 </span>
               </Link>
 
-              {/* PROFILE POPUP CONTROL (SIDE TOP) */}
               <Sheet>
                 <SheetTrigger asChild>
                   <div className="flex items-center gap-2 group cursor-pointer select-none">
@@ -144,7 +136,6 @@ export default function Navbar({
                         className="object-cover"
                       />
                     </div>
-                    {/* Teks nama hanya muncul di desktop sesuai request */}
                     <span
                       className={`text-sm font-bold tracking-tight hidden md:block ${isBlackText ? "text-gray-800" : "text-white"}`}
                     >
@@ -187,8 +178,8 @@ export default function Navbar({
                         alt="address"
                         width={16}
                         height={16}
-                      />{" "}
-                      Delivery Address / Profile
+                      />
+                      Profile / Delivery Address
                     </Link>
                     <button
                       onClick={() => {
@@ -203,7 +194,7 @@ export default function Navbar({
                         alt="logout"
                         width={16}
                         height={16}
-                      />{" "}
+                      />
                       Logout
                     </button>
                   </div>
@@ -211,7 +202,6 @@ export default function Navbar({
               </Sheet>
             </div>
           ) : (
-            // ================= SCREEN: BEFORE LOGIN =================
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-4">
                 <Link href="/login">
