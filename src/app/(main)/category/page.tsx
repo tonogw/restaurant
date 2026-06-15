@@ -5,13 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { restoApi } from "@/lib/api/resto";
 import Navbar from "@/components/shared/Navbar";
-// import Footer from "@/components/shared/Footer";
 import RestoCard from "@/components/shared/RestoCard";
 import type { RestaurantItem, RestoResponse } from "@/types/resto";
 import { Star } from "lucide-react";
-
-// import { authService } from "@/services/authService";
-// import { cartService } from "@/services/cartService";
 
 function CategoryPageContent() {
   const router = useRouter();
@@ -26,16 +22,9 @@ function CategoryPageContent() {
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
+  // FETCH DATA UTAMA
   const { data, isLoading } = useQuery<RestoResponse>({
-    queryKey: [
-      "restaurants-filter",
-      currentCategory,
-      currentSearch,
-      distanceFilters,
-      minPrice,
-      maxPrice,
-      selectedRating,
-    ],
+    queryKey: ["restaurants-filter", currentCategory, currentSearch],
     queryFn: () => restoApi.getRestaurants(currentSearch, currentCategory),
   });
 
@@ -49,14 +38,52 @@ function CategoryPageContent() {
     );
   };
 
+  // =========================================================================
+  // ✓ LOGIKA FILTER FRONTEND: 100% TYPE-SAFE TANPA ANY BERDASARKAN API REALWAY
+  // =========================================================================
+  const computedFilteredRestos = restoList.filter((resto: RestaurantItem) => {
+    // 1. Saringan Validasi Rating Bintang (Menggunakan property 'star' sesuai skema Swagger)
+    if (selectedRating !== null) {
+      const itemRating = resto.star || 0;
+      if (Math.floor(itemRating) !== selectedRating) {
+        return false;
+      }
+    }
+
+    // 2. Saringan Validasi Jarak Batas Km Murni
+    if (distanceFilters.length > 0) {
+      const itemDistance = resto.distance || 0;
+      const matchDistance = distanceFilters.some((filter) => {
+        if (filter === "Nearby") return itemDistance <= 2.0;
+        if (filter === "Within 1km") return itemDistance <= 1.0;
+        if (filter === "Within 3km") return itemDistance <= 3.0;
+        if (filter === "Within 5km") return itemDistance <= 5.0;
+        return true;
+      });
+      if (!matchDistance) return false;
+    }
+
+    // 3. Saringan Validasi Batas Nilai Harga Berdasarkan 'priceRange' dari Server
+    const numericMin = minPrice ? parseFloat(minPrice) : null;
+    const numericMax = maxPrice ? parseFloat(maxPrice) : null;
+
+    if (resto.priceRange) {
+      if (numericMin !== null && resto.priceRange.min < numericMin) {
+        return false;
+      }
+      if (numericMax !== null && resto.priceRange.max > numericMax) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-nunito pt-24 pb-20">
-      {/* Navbar dikunci warna hitam sejati sejak awal terbuka */}
       <Navbar isLightPage={true} />
 
-      {/* CONTAINER UTAMA: Lebar maksimal dikunci 1200px agar simetris tengah monitor */}
       <div className="max-w-300 mx-auto px-6 mt-6 flex flex-col gap-6">
-        {/* HEADER JUDUL: Berdiri mandiri tepat di pojok kiri bawah garis lurus wilayah Logo */}
         <div className="flex flex-col gap-1 w-full text-left">
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
             {currentCategory}
@@ -68,18 +95,31 @@ function CategoryPageContent() {
           )}
         </div>
 
-        {/* AREA KONTEN: Memisahkan Filter (266px) dan Grid Area Restoran (894px) */}
         <div className="w-full flex flex-col lg:flex-row gap-10 items-start mt-2">
-          {/* ================= SISI KIRI: BLOK FILTER (266px x 792px) ================= */}
+          {/* ================= SISI KIRI: BLOK FILTER ================= */}
           <aside className="w-full lg:w-[266px] h-auto lg:h-[792px] bg-white p-6 rounded-3xl border border-gray-100 shadow-xs flex flex-col gap-6 flex-shrink-0">
-            <div>
-              <h2 className="font-extrabold text-gray-900 text-lg mb-4">
-                Filter
-              </h2>
-              <div className="w-full h-px bg-gray-100" />
+            <div className="flex items-center justify-between">
+              <h2 className="font-extrabold text-gray-900 text-lg">Filter</h2>
+              {(distanceFilters.length > 0 ||
+                minPrice ||
+                maxPrice ||
+                selectedRating !== null) && (
+                <button
+                  onClick={() => {
+                    setDistanceFilters([]);
+                    setMinPrice("");
+                    setMaxPrice("");
+                    setSelectedRating(null);
+                  }}
+                  className="text-xs font-bold text-[#C12116] hover:underline cursor-pointer"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
+            <div className="w-full h-px bg-gray-100 " />
 
-            {/* 1. Kriteria Jarak (Checkboxes) */}
+            {/* 1. Jarak */}
             <div className="space-y-3">
               <h3 className="font-bold text-sm text-gray-900 tracking-tight">
                 Distance
@@ -104,7 +144,7 @@ function CategoryPageContent() {
               </div>
             </div>
 
-            {/* 2. Kriteria Harga (2 Baris Input Eksplisit) */}
+            {/* 2. Harga */}
             <div className="space-y-3 border-t border-gray-100 pt-4">
               <h3 className="font-bold text-sm text-gray-900 tracking-tight">
                 Price
@@ -137,7 +177,7 @@ function CategoryPageContent() {
               </div>
             </div>
 
-            {/* 3. Kriteria Rating (5 Tingkat Bintang Turun ke Bawah) */}
+            {/* 3. Rating */}
             <div className="space-y-3 border-t border-gray-100 pt-4">
               <h3 className="font-bold text-sm text-gray-900 tracking-tight">
                 Rating
@@ -179,7 +219,7 @@ function CategoryPageContent() {
             </div>
           </aside>
 
-          {/* ================= SISI KANAN: BLOK GRID RESTORAN (894px x 668px) ================= */}
+          {/* ================= SISI KANAN: GRID LIST RESTO ================= */}
           <main className="w-full lg:w-[894px] min-h-[668px] flex flex-col gap-6">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -190,18 +230,17 @@ function CategoryPageContent() {
                   />
                 ))}
               </div>
-            ) : restoList.length === 0 ? (
-              <div className="w-full py-28 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-3xl text-center">
+            ) : computedFilteredRestos.length === 0 ? (
+              <div className="w-full py-28 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-3xl text-center shadow-xs">
                 <span className="text-4xl">🍽️</span>
                 <p className="text-gray-400 text-sm font-bold mt-4">
                   No restaurants match your active criteria.
                 </p>
               </div>
             ) : (
-              // Grid Responsif 2 Kolom Sejati (Lebar Card mengembang maksimal sesuai porsi kolom)
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                {restoList.map((resto: RestaurantItem) => (
-                  <div key={resto.id} className="w-full lg:w-[437px] h-[152px]">
+                {computedFilteredRestos.map((resto: RestaurantItem) => (
+                  <div key={resto.id} className="w-full h-[152px]">
                     <RestoCard
                       resto={resto}
                       onClick={() => router.push(`/resto/${resto.id}`)}
@@ -213,14 +252,12 @@ function CategoryPageContent() {
           </main>
         </div>
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }
 
 export default function CategoryPage() {
   return (
-    // Membungkus komponen konten dengan Suspense agar lolos uji prerendering Next.js
     <Suspense
       fallback={
         <div className="p-20 text-center font-bold font-nunito animate-pulse text-gray-400">

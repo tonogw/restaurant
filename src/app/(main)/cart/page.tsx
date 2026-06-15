@@ -204,9 +204,6 @@ export default function CartPage() {
           </button>
         </div>
       </main>
-      <div className="bg-black">
-        <Footer />
-      </div>
     </div>
   );
 }

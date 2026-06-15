@@ -163,9 +163,9 @@ export interface RestaurantItem {
   logo: string;
   image: string[];
   category: string;
-  review_count: number;
+  reviewCount: number;
   menu_count: number;
-  price_range: {
+  priceRange: {
     min: number;
     max: number;
   };
